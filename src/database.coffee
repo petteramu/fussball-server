@@ -39,9 +39,9 @@ class Database
 	# Updates a players object in the database
 	# @param [String] key
 	# @param [Object] player
-	updatePlayer: (key, object) ->
+	updatePlayer: (key, object, cb) ->
 		path = "#{SEASON_PATH}#{PLAYERS_PATH}#{key}"
-		@_update(path, object)
+		@_update(path, object, cb)
 
 	# Adds a game to the matches list
 	# @param [Object] object
@@ -75,7 +75,7 @@ class Database
 	# @param [String] path
 	# @param [Object] data
 	# @private
-	_push: (path, data) ->
+	_push: (path, data, cb) ->
 		unless path?
 			throw new Error("Missing parameter \"path\" in db._push")
 			return
@@ -88,13 +88,13 @@ class Database
 			throw new Error("path includes undefined in db._push")
 			return
 
-		@db.ref(path).push(data)
+		@db.ref(path).push(data, cb)
 
 	# Updates some path in the database
 	# @param [String] path
 	# @param [Object] data
 	# @private
-	_update: (path, data) ->
+	_update: (path, data, cb) ->
 		unless path?
 			throw new Error("Missing parameter \"path\" in db._update")
 			return
@@ -107,7 +107,7 @@ class Database
 			throw new Error("path includes undefined in db._update")
 			return
 
-		@db.ref(path).update(data)
+		@db.ref(path).update(data, cb)
 
 	# Returns the firebase conneciton config
 	# @return [Object]

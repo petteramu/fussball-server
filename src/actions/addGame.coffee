@@ -24,12 +24,7 @@ addGame = (game, cb) ->
 
 	timestamp = new Date().getTime()
 
-	updateWinner(game.winner1, newWinner1Elo)
-	updateWinner(game.winner2, newWinner2Elo)
-	updateLoser(game.loser1, newLoser1Elo)
-	updateLoser(game.loser2, newLoser2Elo)
-
-	game =
+	newGame =
 		timestamp: timestamp
 		difference: game.difference
 		winners: [
@@ -53,9 +48,20 @@ addGame = (game, cb) ->
 			}
 		]
 
-	db.addGame(game)
-
-	cb("Success")
+	db.addGame(newGame)
+	.then((err, result) ->
+		updateWinner(game.winner1, newWinner1Elo)
+	).then((err, result) ->
+		updateWinner(game.winner2, newWinner2Elo)
+	).then((err, result) ->
+		updateLoser(game.loser1, newLoser1Elo)
+	).then((err, result) ->
+		updateLoser(game.loser2, newLoser2Elo)
+	).then((err, result) ->
+		cb?("Success")
+	).catch((err) ->
+		console.log(err)
+	)
 
 # Updates a loser player. Will set the new rating, reset the streak and increment losses
 # @param [String] key
