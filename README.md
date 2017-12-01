@@ -2,11 +2,11 @@
 
 *Designed to work on Amazon AWS Lambda*
 
-Requires the following:
+### Requires the following:
 
-Node 6.10 (Lambda requirement)
+- Node 6.10 (Lambda requirement)
 
-Environment variables in Lambda:
+### Environment variables in Lambda:
 
 *Firebase config*
 - apiKey
