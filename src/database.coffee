@@ -7,6 +7,8 @@ MATCHES_PATH = process.env.matches || 'matches/'
 
 class Database
 
+	initialized: false
+
 	# @param [Function] cb The function to call when all listeners have been set up
 	constructor: (cb) ->
 		# Because of the way lambda works, we need to make sure to not initialize the firebase
@@ -20,10 +22,13 @@ class Database
 
 	# Closes the connection to the db
 	close: ->
+		delete @players
+		delete @matches
 		@db?.goOffline()
 
 	open: ->
 		@db?.goOnline()
+		@_setupListeners()
 
 	# Set a callback to be called when the database is initialized
 	# Will call the callback if already initialized
@@ -32,6 +37,16 @@ class Database
 		@cb = cb
 		if @players? and @matches?
 			@cb?()
+
+	onMatchesUpdated: ->
+		if @players? and not @initialized
+			@cb?()
+			@initialized = true
+
+	onPlayersUpdated: ->
+		if @matches? and not @initialized
+			@cb?()
+			@initialized = true
 
 	# Return the current player list
 	# @return [Object] players
@@ -84,17 +99,19 @@ class Database
 	# @private
 	_setupListeners: () ->
 		@db.ref("#{SEASON_PATH}#{PLAYERS_PATH}").once('value', (result) =>
+			console.log "PLAYERS UPDATED"
 			@players = result.val()
 			@players ?= {}
 
-			@cb?() if @matches?
+			@onPlayersUpdated()
 		)
 
 		@db.ref("#{SEASON_PATH}#{MATCHES_PATH}").once('value', (result) =>
+			console.log "MATCHES UPDATED"
 			@matches = result.val()
 			@matches ?= {}
 
-			@cb?() if @players?
+			@onMatchesUpdated()
 		)
 
 	# Remove a path on the db

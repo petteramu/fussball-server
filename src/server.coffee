@@ -6,8 +6,8 @@ removeGame = require './actions/removeGame'
 delegate = (e, context, callback) ->
 	context?.callbackWaitsForEmptyEventLoop = false
 	try
+		db.open()
 		db.onInitialized(() =>
-			db.open()
 			switch e.action
 				when 'addGame'
 					addGame(e, (err, msg) ->

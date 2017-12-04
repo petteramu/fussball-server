@@ -7,29 +7,20 @@ calculateGame = require '../utils/calculateGame'
 addGame = (game, cb) ->
 	{ newGame, newWinner1Elo, newWinner2Elo, newLoser1Elo, newLoser2Elo } = calculateGame(game)
 
-	console.log newGame
-
 	console.log("preparing to add game")
-	try
-		db.addGame(newGame)
-		.then((result) ->
-			console.log("added game, updating players")
-			promises = []
-			promises.push updateWinner(game.winner1, newWinner1Elo)
-			promises.push updateWinner(game.winner2, newWinner2Elo)
-			promises.push updateLoser(game.loser1, newLoser1Elo)
-			promises.push updateLoser(game.loser2, newLoser2Elo)
 
-			Promise.all(promises).then((result) ->
-				cb?(null, "Successfully added game")
-			).catch((err) ->
-				cb?(err)
-			)
-		).catch((err) ->
-			cb?(err)
-		)
-	catch err
+	promises = []
+	promises.push db.addGame(newGame)
+	promises.push updateWinner(game.winner1, newWinner1Elo)
+	promises.push updateWinner(game.winner2, newWinner2Elo)
+	promises.push updateLoser(game.loser1, newLoser1Elo)
+	promises.push updateLoser(game.loser2, newLoser2Elo)
+
+	Promise.all(promises).then((result) ->
+		cb?(null, "Successfully added game")
+	).catch((err) ->
 		cb?(err)
+	)
 
 # Updates a loser player. Will set the new rating, reset the streak and increment losses
 # @param [String] key
