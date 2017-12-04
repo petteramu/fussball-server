@@ -9,10 +9,21 @@ class Database
 
 	# @param [Function] cb The function to call when all listeners have been set up
 	constructor: (cb) ->
-		firebase.initializeApp(@_getConfig());
-		@db = firebase.database()
+		# Because of the way lambda works, we need to make sure to not initialize the firebase
+		# app if one already exsits in another function
+		if firebase.apps.length is 0
+			firebase.initializeApp(@_getConfig())
+
+		@db ?= firebase.database()
 
 		@_setupListeners()
+
+	# Closes the connection to the db
+	close: ->
+		@db?.goOffline()
+
+	open: ->
+		@db?.goOnline()
 
 	# Set a callback to be called when the database is initialized
 	# Will call the callback if already initialized
@@ -30,18 +41,31 @@ class Database
 	# @return [Array] matches
 	getMatches: -> @matches
 
+	# Returns a specific game by id
+	# @param [String]
+	# @return [Object]
+	getMatch: (id) ->
+		path = "#{SEASON_PATH}#{MATCHES_PATH}"
+		@matches[id]
+
 	# Returns a specific player
 	# @param [String] key
 	# @return [Object] player
 	getPlayer: (key) ->
 		return @players?[key]
 
+	# Updates the entire match history
+	# @param [Object] newHistory
+	updateMatches: (newHistory) ->
+		path = "#{SEASON_PATH}#{MATCHES_PATH}"
+		@_update(path, newHistory)
+
 	# Updates a players object in the database
 	# @param [String] key
 	# @param [Object] player
-	updatePlayer: (key, object, cb) ->
+	updatePlayer: (key, object) ->
 		path = "#{SEASON_PATH}#{PLAYERS_PATH}#{key}"
-		@_update(path, object, cb)
+		@_update(path, object)
 
 	# Adds a game to the matches list
 	# @param [Object] object
@@ -49,9 +73,11 @@ class Database
 		path = "#{SEASON_PATH}#{MATCHES_PATH}"
 		@_push(path, object)
 
-	# Closes the connection to the db
-	close: ->
-		@db.goOffline()
+	# Removes a game from the match history
+	# @param [String] id
+	removeGame: (id) ->
+		path = "#{SEASON_PATH}#{MATCHES_PATH}#{id}"
+		@_remove(path)
 
 	# Sets up listeners that the database should update live
 	# @param [Function] cb The function to call when all listeners have been set up
@@ -71,11 +97,17 @@ class Database
 			@cb?() if @players?
 		)
 
+	# Remove a path on the db
+	# @param [String] path
+	# @private
+	_remove: (path) ->
+		@db.ref(path).remove()
+
 	# Pushes a value to a list
 	# @param [String] path
 	# @param [Object] data
 	# @private
-	_push: (path, data, cb) ->
+	_push: (path, data) ->
 		unless path?
 			throw new Error("Missing parameter \"path\" in db._push")
 			return
@@ -88,13 +120,13 @@ class Database
 			throw new Error("path includes undefined in db._push")
 			return
 
-		@db.ref(path).push(data, cb)
+		@db.ref(path).push(data)
 
 	# Updates some path in the database
 	# @param [String] path
 	# @param [Object] data
 	# @private
-	_update: (path, data, cb) ->
+	_update: (path, data) ->
 		unless path?
 			throw new Error("Missing parameter \"path\" in db._update")
 			return
@@ -107,7 +139,7 @@ class Database
 			throw new Error("path includes undefined in db._update")
 			return
 
-		@db.ref(path).update(data, cb)
+		@db.ref(path).update(data)
 
 	# Returns the firebase conneciton config
 	# @return [Object]

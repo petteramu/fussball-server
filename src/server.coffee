@@ -1,22 +1,36 @@
 db = require './database'
 addGame = require './actions/addGame'
 addPlayer = require './actions/addPlayer'
+removeGame = require './actions/removeGame'
 
-handler = (e, context, callback) ->
-	db.onInitialized(() =>
-		# addPlayer("christer")
-		addGame(e, (msg) =>
-			db.close()
-			console.log(msg)
-			callback?(msg)
+delegate = (e, context, callback) ->
+	context?.callbackWaitsForEmptyEventLoop = false
+	try
+		db.onInitialized(() =>
+			db.open()
+			switch e.action
+				when 'addGame'
+					addGame(e, (err, msg) ->
+						db.close()
+						console.log(msg)
+						callback?(null, msg)
+					)
+				when 'addPlayer'
+					addPlayer(e, (err, msg) ->
+						db.close()
+						console.log(msg)
+						callback?(null, msg)
+					)
+				when 'removeGame'
+					removeGame(e.id, (err, msg) ->
+						db.close()
+						console.log(msg)
+						callback?(null, msg)
+					)
+				else
+					callback?("Failed: no such action")
 		)
-	)
+	catch err
+		callback(err)
 
-game =
-	winner1: 'petter'
-	winner2: 'pawel'
-	loser1: 'christer'
-	loser2: 'thomas'
-	difference: 10
-
-handler(game)
+module.exports.handler = delegate
