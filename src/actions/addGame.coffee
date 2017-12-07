@@ -7,8 +7,6 @@ calculateGame = require '../utils/calculateGame'
 addGame = (game, cb) ->
 	{ newGame, newWinner1Elo, newWinner2Elo, newLoser1Elo, newLoser2Elo } = calculateGame(game)
 
-	console.log("preparing to add game")
-
 	promises = []
 	promises.push db.addGame(newGame)
 	promises.push updateWinner(game.winner1, newWinner1Elo)
@@ -29,7 +27,13 @@ updateLoser = (key, rating) ->
 	player = db.getPlayer(key)
 	player.lastUpdated = new Date().getTime()
 	player.ranking = rating
-	player.streak = 0
+
+	player.streak ?= 0
+	if player.streak > 0
+		player.streak = -1
+	else
+		player.streak--
+
 	player.losses ?= 0
 	player.losses++
 	db.updatePlayer(key, player)
@@ -41,8 +45,13 @@ updateWinner = (key, rating) ->
 	player = db.getPlayer(key)
 	player.lastUpdated = new Date().getTime()
 	player.ranking = rating
+
 	player.streak ?= 0
-	player.streak++
+	if player.streak < 0
+		player.streak = 1
+	else
+		player.streak++
+
 	player.wins ?= 0
 	player.wins++
 	db.updatePlayer(key, player)

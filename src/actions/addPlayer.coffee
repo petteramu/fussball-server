@@ -10,10 +10,14 @@ addPlayer = (name, cb) ->
 
 	# Don't add player if it already exists
 	if db.getPlayer(name)?
+		cb("Player already exists")
 		return
 
 	player =
 		ranking: 1200
+		streak: 0
+		wins: 0
+		losses: 0
 
 	db.updatePlayer(name, player)
 	.then((result) ->

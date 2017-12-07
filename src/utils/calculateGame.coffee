@@ -6,6 +6,7 @@ DEFAULT_KFACTOR = process.env.kfactor || 32
 # @param [Object]
 # @return [Object]
 calculateGame = (game) ->
+	game.difference = parseInt(game.difference)
 	_validateGame(game)
 
 	winner1Rating = getRating(game.winner1)
@@ -36,20 +37,24 @@ calculateGame = (game) ->
 			{
 				key: game.winner1
 				gain: winner1Gain
+				preRanking: winner1Rating
 			}
 			{
 				key: game.winner2
 				gain: winner2Gain
+				preRanking: winner2Rating
 			}
 		]
 		losers: [
 			{
 				key: game.loser1
 				loss: loser1Loss
+				preRanking: loser1Rating
 			}
 			{
 				key: game.loser2
 				loss: loser2Loss
+				preRanking: loser2Rating
 			}
 		]
 
@@ -151,7 +156,7 @@ _validateGame = (data) ->
 	unless data.difference?
 		throw new Error("No score given")
 
-	unless data.difference >= 0 and data.difference <= 10
-		throw new Error("Difference must be from 0 to 10")
+	if data.difference < 0 or data.difference > 10 or isNaN(data.difference)
+		throw new Error("Difference must be a number from 0 to 10")
 
 module.exports = calculateGame

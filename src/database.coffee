@@ -8,6 +8,7 @@ MATCHES_PATH = process.env.matches || 'matches/'
 class Database
 
 	initialized: false
+	closed: false
 
 	# @param [Function] cb The function to call when all listeners have been set up
 	constructor: (cb) ->
@@ -22,13 +23,17 @@ class Database
 
 	# Closes the connection to the db
 	close: ->
+		@initialized = false
+		@closed = true
 		delete @players
 		delete @matches
 		@db?.goOffline()
 
 	open: ->
-		@db?.goOnline()
-		@_setupListeners()
+		if @closed
+			@db?.goOnline()
+			@closed = false
+			@_setupListeners()
 
 	# Set a callback to be called when the database is initialized
 	# Will call the callback if already initialized

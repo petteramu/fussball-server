@@ -40,8 +40,8 @@ module.exports = function(grunt) {
           archive: 'build.zip'
         },
         files: [
-          { src: ['build/**'], dest: '/' },
-          { src: ['node_modules/'], dest: '/node_modules' }
+          { expand: true, src: ['./**/*'], cwd: 'build/'},
+          { src: ['node_modules/**'], dest: '/' }
         ]
       }
     },
