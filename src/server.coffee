@@ -33,6 +33,7 @@ delegate = (e, context, callback) ->
 					callback?(null, createResponse("Failed: no such action"))
 		)
 	catch err
+		console.log(err)
 		callback?(createResponse(err))
 
 createResponse = (msg) ->
