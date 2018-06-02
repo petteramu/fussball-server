@@ -5,14 +5,14 @@ calculateGame = require '../utils/calculateGame'
 # @param [Object] game
 # @param [Function] cb
 addGame = (game, cb) ->
-	{ newGame, newWinner1Elo, newWinner2Elo, newLoser1Elo, newLoser2Elo } = calculateGame(game)
+	game.winner = game.winner.toLowerCase()
+	game.loser  = game.loser.toLowerCase()
+	{ newGame, newWinnerElo, newLoserElo } = calculateGame(game)
 
 	promises = []
 	promises.push db.addGame(newGame)
-	promises.push updateWinner(game.winner1, newWinner1Elo)
-	promises.push updateWinner(game.winner2, newWinner2Elo)
-	promises.push updateLoser(game.loser1, newLoser1Elo)
-	promises.push updateLoser(game.loser2, newLoser2Elo)
+	promises.push updateWinner(game.winner, newWinnerElo)
+	promises.push updateLoser(game.loser, newLoserElo)
 
 	Promise.all(promises).then((result) ->
 		cb?(null, "Successfully added game")

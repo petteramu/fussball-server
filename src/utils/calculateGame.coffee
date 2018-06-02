@@ -6,86 +6,51 @@ DEFAULT_KFACTOR = process.env.kfactor || 32
 # @param [Object]
 # @return [Object]
 calculateGame = (game) ->
-	game.difference = parseInt(game.difference)
 	_validateGame(game)
 
-	winner1Rating = getRating(game.winner1)
-	winner2Rating = getRating(game.winner2)
-	loser1Rating = getRating(game.loser1)
-	loser2Rating = getRating(game.loser2)
+	winnerRating = getRating(game.winner)
+	loserRating = getRating(game.loser)
 
-	{ winner1Probability, winner2Probability, loser1Probability, loser2Probability } = getPlayerProbability(winner1Rating, winner2Rating, loser1Rating, loser2Rating)
+	{ winnerProbability, loserProbability } = getPlayerProbability(winnerRating, loserRating)
 
-	newWinner1Elo = getNewRating(winner1Rating, 1, winner1Probability, game.difference)
-	winner1Gain = newWinner1Elo - winner1Rating
+	newWinnerElo = getNewRating(winnerRating, 1, winnerProbability)
+	winnerGain = newWinnerElo - winnerRating
 
-	newWinner2Elo = getNewRating(winner2Rating, 1, winner2Probability, game.difference)
-	winner2Gain = newWinner2Elo - winner2Rating
-
-	newLoser1Elo = getNewRating(loser1Rating, 0, loser1Probability, game.difference)
-	loser1Loss = loser1Rating - newLoser1Elo
-
-	newLoser2Elo = getNewRating(loser2Rating, 0, loser2Probability, game.difference)
-	loser2Loss = loser2Rating - newLoser2Elo
+	newLoserElo = getNewRating(loserRating, 0, loserProbability)
+	loserLoss = loserRating - newLoserElo
 
 	timestamp = new Date().getTime()
 
 	newGame =
 		timestamp: timestamp
-		difference: game.difference
 		winners: [
 			{
-				key: game.winner1
-				gain: winner1Gain
-				preRanking: winner1Rating
-			}
-			{
-				key: game.winner2
-				gain: winner2Gain
-				preRanking: winner2Rating
+				key: game.winner
+				gain: winnerGain
+				preRanking: winnerRating
 			}
 		]
 		losers: [
 			{
-				key: game.loser1
-				loss: loser1Loss
-				preRanking: loser1Rating
-			}
-			{
-				key: game.loser2
-				loss: loser2Loss
-				preRanking: loser2Rating
+				key: game.loser
+				loss: loserLoss
+				preRanking: loserRating
 			}
 		]
 
-	return { newGame, newWinner1Elo, newWinner2Elo, newLoser1Elo, newLoser2Elo }
+	return { newGame, newWinnerElo, newLoserElo }
 
 # Returns the probability of each of the players winning the game given
-# @param [Numerical] winner1Rating
+# @param [Numerical] winnerRating
 # @param [Numerical] winner2Rating
 # @param [Numerical] loser1Rating
 # @param [Numerical] loser2Rating
 # @return [Object] Object containing the probabilities
-getPlayerProbability = (winner1Rating, winner2Rating, loser1Rating, loser2Rating) ->
-	losersAvg = averageRating(loser1Rating, loser2Rating)
-	winnersAvg = averageRating(winner1Rating, winner2Rating)
+getPlayerProbability = (winnerRating, loserRating) ->
+	winnerProbability = getProbability(loserRating, winnerRating)
+	loserProbability = getProbability(winnerRating, loserRating)
 
-	winnersProbability = getProbability(losersAvg, winnersAvg)
-	losersProbability = getProbability(winnersAvg, losersAvg)
-
-	winner1Probability = getProbability(losersAvg, winner1Rating)
-	winner1Probability = (winnersProbability + winner1Probability) / 2
-
-	winner2Probability = getProbability(losersAvg, winner2Rating)
-	winner2Probability = (winnersProbability + winner2Probability) / 2
-
-	loser1Probability = getProbability(winnersAvg, loser1Rating)
-	loser1Probability = (losersProbability + loser1Probability) / 2
-
-	loser2Probability = getProbability(winnersAvg, loser2Rating)
-	loser2Probability = (losersProbability + loser2Probability) / 2
-
-	return { winner1Probability, winner2Probability, loser1Probability, loser2Probability }
+	return { winnerProbability, loserProbability }
 
 # Returns the probability that a player will win against another team
 # @param [Numerical] opposingTeamAvg
@@ -112,8 +77,8 @@ averageRating = (player1, player2) ->
 # @param [Numerical] result (0 for loss or 1 for win)
 # @param [Numerical] probability
 # @param [Numerical] difference The difference in goals
-getNewRating = (currentRating, result, probability, difference) ->
-	return currentRating + (getKByDiff(difference) * (result - probability))
+getNewRating = (currentRating, result, probability) ->
+	return currentRating + (DEFAULT_KFACTOR * (result - probability))
 
 # Returns a new K-factor based on the difference in the score of a game
 # @param [Integer] difference
@@ -147,16 +112,10 @@ getKByDiff = (difference) ->
 # Makes sure it contains the correct properties
 # @param [Object] data
 _validateGame = (data) ->
-	unless data.winner1? and data.winner2? and data.loser1? and data.loser2?
+	unless data.winner? and data.loser?
 		throw new Error("Missing player data in game object")
 
-	unless db.getPlayer(data.winner1)? and db.getPlayer(data.loser2)? and db.getPlayer(data.loser1)? and db.getPlayer(data.loser2)?
+	unless db.getPlayer(data.winner)? and db.getPlayer(data.loser)?
 		throw new Error("One or more players does not exist")
-
-	unless data.difference?
-		throw new Error("No score given")
-
-	if data.difference < 0 or data.difference > 10 or isNaN(data.difference)
-		throw new Error("Difference must be a number from 0 to 10")
 
 module.exports = calculateGame
