@@ -57,6 +57,7 @@ removeFromMiddle = (id, cb) ->
 			loser2: match.losers[1].key
 			difference: match.difference
 
+		newGame.timestamp = originalTimestamp
 		newHistory[key] = newGame
 		players[match.winners[0].key].ranking = newWinner1Elo
 		players[match.winners[1].key].ranking = newWinner2Elo
