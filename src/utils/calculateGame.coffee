@@ -121,25 +121,15 @@ getNewRating = (currentRating, result, probability, difference) ->
 getKByDiff = (difference) ->
 	switch (difference)
 		when 1
-			newK = DEFAULT_KFACTOR * 1.09
+			newK = DEFAULT_KFACTOR * 1
 		when 2
-			newK = DEFAULT_KFACTOR * 1.13
+			newK = DEFAULT_KFACTOR * 1.075
 		when 3
-			newK = DEFAULT_KFACTOR * 1.19
+			newK = DEFAULT_KFACTOR * 1.15
 		when 4
-			newK = DEFAULT_KFACTOR * 1.27
+			newK = DEFAULT_KFACTOR * 1.225
 		when 5
-			newK = DEFAULT_KFACTOR * 1.37
-		when 6
-			newK = DEFAULT_KFACTOR * 1.52
-		when 7
-			newK = DEFAULT_KFACTOR * 1.73
-		when 8
-			newK = DEFAULT_KFACTOR * 2.02
-		when 9
-			newK = DEFAULT_KFACTOR * 2.43
-		when 10
-			newK = DEFAULT_KFACTOR * 3
+			newK = DEFAULT_KFACTOR * 1.3
 
 	return newK
 
