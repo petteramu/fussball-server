@@ -16,7 +16,16 @@ findLastMatch = (matches) ->
 # @param [String] id
 # @param [Function] cb
 removeGame = (id, cb) ->
+	unless id?.length > 0
+		cb?('No id given to removeGame')
+		return
+
 	matches = db.getMatches()
+
+	unless matches?[id]?
+		cb?("Game with id #{id} does not exist")
+		return
+
 	{ key, lastMatch } = findLastMatch(matches)
 
 	console.log("key: #{key}, last: #{lastMatch}")
