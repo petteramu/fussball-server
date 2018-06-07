@@ -73,6 +73,10 @@ removeFromMiddle = (id, cb) ->
 		players[match.losers[0].key].ranking = newLoser1Elo
 		players[match.losers[1].key].ranking = newLoser2Elo
 
+		incrementStreak(players[match.winners[0].key], true)
+		incrementStreak(players[match.winners[1].key], true)
+		incrementStreak(players[match.losers[0].key], false)
+		incrementStreak(players[match.losers[1].key], false)
 
 	promises = []
 	promises.push db.removeGame(id)
@@ -86,6 +90,7 @@ removeFromMiddle = (id, cb) ->
 		callback(err)
 	)
 
+incrementStreak = (player, win) ->
 	if win
 		player.wins++
 		player.streak = if player.streak < 0 then 1 else player.streak + 1
