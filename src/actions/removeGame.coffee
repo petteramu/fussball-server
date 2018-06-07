@@ -16,7 +16,16 @@ findLastMatch = (matches) ->
 # @param [String] id
 # @param [Function] cb
 removeGame = (id, cb) ->
+	unless id?.length > 0
+		cb?('No id given to removeGame')
+		return
+
 	matches = db.getMatches()
+
+	unless matches?[id]?
+		cb?("Game with id #{id} does not exist")
+		return
+
 	{ key, lastMatch } = findLastMatch(matches)
 
 	console.log("key: #{key}, last: #{lastMatch}")
@@ -57,11 +66,17 @@ removeFromMiddle = (id, cb) ->
 			loser2: match.losers[1].key
 			difference: match.difference
 
+		newGame.timestamp = originalTimestamp
 		newHistory[key] = newGame
 		players[match.winners[0].key].ranking = newWinner1Elo
 		players[match.winners[1].key].ranking = newWinner2Elo
 		players[match.losers[0].key].ranking = newLoser1Elo
 		players[match.losers[1].key].ranking = newLoser2Elo
+
+		incrementStreak(players[match.winners[0].key], true)
+		incrementStreak(players[match.winners[1].key], true)
+		incrementStreak(players[match.losers[0].key], false)
+		incrementStreak(players[match.losers[1].key], false)
 
 	promises = []
 	promises.push db.removeGame(id)
@@ -74,6 +89,14 @@ removeFromMiddle = (id, cb) ->
 	).catch((err) ->
 		callback(err)
 	)
+
+incrementStreak = (player, win) ->
+	if win
+		player.wins++
+		player.streak = if player.streak < 0 then 1 else player.streak + 1
+	else
+		player.losses++
+		player.streak = if player.streak > 0 then -1 else player.streak - 1
 
 # Resets the ranking of all players in the object
 # @param [Object] players
@@ -117,6 +140,9 @@ rollBackPlayer = (data) ->
 		player.ranking += data.loss
 	else
 		throw new Error("Player does not exist")
+
+	# Reset streak
+	player.streak = 0
 
 	db.updatePlayer(data.key, player)
 
