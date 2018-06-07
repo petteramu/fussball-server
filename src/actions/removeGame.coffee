@@ -73,6 +73,7 @@ removeFromMiddle = (id, cb) ->
 		players[match.losers[0].key].ranking = newLoser1Elo
 		players[match.losers[1].key].ranking = newLoser2Elo
 
+
 	promises = []
 	promises.push db.removeGame(id)
 	promises.push db.updateMatches(newHistory)
@@ -84,6 +85,13 @@ removeFromMiddle = (id, cb) ->
 	).catch((err) ->
 		callback(err)
 	)
+
+	if win
+		player.wins++
+		player.streak = if player.streak < 0 then 1 else player.streak + 1
+	else
+		player.losses++
+		player.streak = if player.streak > 0 then -1 else player.streak - 1
 
 # Resets the ranking of all players in the object
 # @param [Object] players
@@ -127,6 +135,9 @@ rollBackPlayer = (data) ->
 		player.ranking += data.loss
 	else
 		throw new Error("Player does not exist")
+
+	# Reset streak
+	player.streak = 0
 
 	db.updatePlayer(data.key, player)
 
