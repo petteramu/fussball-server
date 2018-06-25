@@ -2,55 +2,58 @@ db = require '../database'
 
 DEFAULT_KFACTOR = process.env.kfactor || 32
 
+calculateChessGame = (game) ->
+	_validateGame(game)
+
 # Calculates a game and the resulting change in rating for the given set of players
 # @param [Object]
 # @return [Object]
 calculateGame = (game) ->
 	_validateGame(game)
 
-	winnerRating = getRating(game.winner)
-	loserRating = getRating(game.loser)
+	whiteRating = getRating(game.white)
+	blackRating = getRating(game.black)
 
-	{ winnerProbability, loserProbability } = getPlayerProbability(winnerRating, loserRating)
+	{ whiteProbability, blackProbability } = getPlayerProbability(whiteRating, blackRating)
 
-	newWinnerElo = getNewRating(winnerRating, 1, winnerProbability)
-	winnerGain = newWinnerElo - winnerRating
+	newWhiteElo = getNewRating(whiteRating, getScoreForPlayer('white', game.winner), whiteProbability)
+	whiteGain = if game.winner is 'white' then newWhiteElo - whiteRating else whiteRating - newWhiteElo
 
-	newLoserElo = getNewRating(loserRating, 0, loserProbability)
-	loserLoss = loserRating - newLoserElo
+	newBlackElo = getNewRating(blackRating, getScoreForPlayer('black', game.winner), blackProbability)
+	blackGain = if game.winner is 'black' then newBlackElo - blackRating else blackRating - newBlackElo
 
 	timestamp = new Date().getTime()
 
 	newGame =
 		timestamp: timestamp
-		winners: [
-			{
-				key: game.winner
-				gain: winnerGain
-				preRanking: winnerRating
-			}
-		]
-		losers: [
-			{
-				key: game.loser
-				loss: loserLoss
-				preRanking: loserRating
-			}
-		]
+		winner: game.winner
+		white:
+			key: game.white
+			gain: whiteGain
+			preRanking: whiteRating
+		black:
+			key: game.black
+			loss: blackGain
+			preRanking: blackRating
 
-	return { newGame, newWinnerElo, newLoserElo }
+	return { newGame, newWhiteElo, newBlackElo }
+
+# Returns the score for the player.
+# This is a value that could be 1 for a win, 0.5 for remis and 0 for a loss
+getScoreForPlayer = (player, winner) ->
+	return 1 if winner is player
+	return 0.5 if winner.toLowerCase() is 'remis'
+	return 0 # Loss
 
 # Returns the probability of each of the players winning the game given
-# @param [Numerical] winnerRating
-# @param [Numerical] winner2Rating
-# @param [Numerical] loser1Rating
-# @param [Numerical] loser2Rating
+# @param [Numerical] whiteRating
+# @param [Numerical] blackRating
 # @return [Object] Object containing the probabilities
-getPlayerProbability = (winnerRating, loserRating) ->
-	winnerProbability = getProbability(loserRating, winnerRating)
-	loserProbability = getProbability(winnerRating, loserRating)
+getPlayerProbability = (whiteRating, blackRating) ->
+	whiteProbability = getProbability(blackRating, whiteRating)
+	blackProbability = getProbability(whiteRating, blackRating)
 
-	return { winnerProbability, loserProbability }
+	return { whiteProbability, blackProbability }
 
 # Returns the probability that a player will win against another team
 # @param [Numerical] opposingTeamAvg
@@ -102,10 +105,13 @@ getKByDiff = (difference) ->
 # Makes sure it contains the correct properties
 # @param [Object] data
 _validateGame = (data) ->
-	unless data.winner? and data.loser?
+	unless data.white? and data.black?
 		throw new Error("Missing player data in game object")
 
-	unless db.getPlayer(data.winner)? and db.getPlayer(data.loser)?
+	unless db.getPlayer(data.white)? and db.getPlayer(data.black)?
 		throw new Error("One or more players does not exist")
+
+	unless data.winner?
+		throw new Error("No result submitted")
 
 module.exports = calculateGame
