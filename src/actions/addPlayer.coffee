@@ -21,7 +21,7 @@ addPlayer = (name, cb) ->
 
 	db.updatePlayer(name, player)
 	.then((result) ->
-		cb?(null, "Successfully added player")
+		cb?(null, { message: "Successfully added player"})
 	).catch((err) ->
 		callback(err)
 	)

@@ -23,11 +23,14 @@ addGame = (game, cb) ->
 		promises.push updateRemis(game.black, newBlackElo)
 
 	Promise.all(promises).then((result) ->
-		cb?(null, "Successfully added game")
+		cb?(null,
+			message: "Successfully added game"
+			id: result[0].key
+			game: newGame
+		)
 	).catch((err) ->
 		cb?(err)
 	)
-
 
 # Updates a player in remis game. Will set the new rating and reset the streak
 # @param [String] key
@@ -36,6 +39,9 @@ updateRemis = (key, rating) ->
 	player = db.getPlayer(key)
 	player.lastUpdated = new Date().getTime()
 	player.ranking = rating
+
+	if(player.peak == undefined || rating > player.peak)
+		player.peak = rating
 
 	player.streak ?= 0
 	player.remis ?= 0
@@ -67,6 +73,9 @@ updateWinner = (key, rating) ->
 	player = db.getPlayer(key)
 	player.lastUpdated = new Date().getTime()
 	player.ranking = rating
+
+	if(player.peak == undefined || rating > player.peak)
+		player.peak = rating
 
 	player.streak ?= 0
 	if player.streak < 0

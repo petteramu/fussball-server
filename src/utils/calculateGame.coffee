@@ -29,11 +29,13 @@ calculateGame = (game) ->
 		winner: game.winner
 		white:
 			key: game.white
-			gain: whiteGain
+			gain: if whiteRating <= newWhiteElo then whiteGain else undefined
+			loss: if whiteRating > newWhiteElo then whiteGain else undefined
 			preRanking: whiteRating
 		black:
 			key: game.black
-			loss: blackGain
+			gain: if blackRating <= newBlackElo then blackGain else undefined
+			loss: if blackRating > newBlackElo then blackGain else undefined
 			preRanking: blackRating
 
 	return { newGame, newWhiteElo, newBlackElo }
@@ -82,24 +84,6 @@ averageRating = (player1, player2) ->
 # @param [Numerical] difference The difference in goals
 getNewRating = (currentRating, result, probability) ->
 	return currentRating + (DEFAULT_KFACTOR * (result - probability))
-
-# Returns a new K-factor based on the difference in the score of a game
-# @param [Integer] difference
-# @return [Numerical]
-getKByDiff = (difference) ->
-	switch (difference)
-		when 1
-			newK = DEFAULT_KFACTOR * 1
-		when 2
-			newK = DEFAULT_KFACTOR * 1.075
-		when 3
-			newK = DEFAULT_KFACTOR * 1.15
-		when 4
-			newK = DEFAULT_KFACTOR * 1.225
-		when 5
-			newK = DEFAULT_KFACTOR * 1.3
-
-	return newK
 
 # Validates the object given to addGame
 # Makes sure it contains the correct properties

@@ -59,24 +59,18 @@ removeFromMiddle = (id, cb) ->
 		originalTimestamp = match.timestamp
 
 		# Recalculate the games result
-		{ newGame, newWinner1Elo, newWinner2Elo, newLoser1Elo, newLoser2Elo } = calculateGame
-			winner1: match.winners[0].key
-			winner2: match.winners[1].key
-			loser1: match.losers[0].key
-			loser2: match.losers[1].key
-			difference: match.difference
+		{ newGame, newWhiteElo, newBlackElo } = calculateGame
+			white: match.white.key
+			black: match.black.key
+			winner: match.winner
 
 		newGame.timestamp = originalTimestamp
 		newHistory[key] = newGame
-		players[match.winners[0].key].ranking = newWinner1Elo
-		players[match.winners[1].key].ranking = newWinner2Elo
-		players[match.losers[0].key].ranking = newLoser1Elo
-		players[match.losers[1].key].ranking = newLoser2Elo
+		players[match.white.key].ranking = newWhiteElo
+		players[match.black.key].ranking = newBlackElo
 
-		incrementStreak(players[match.winners[0].key], true)
-		incrementStreak(players[match.winners[1].key], true)
-		incrementStreak(players[match.losers[0].key], false)
-		incrementStreak(players[match.losers[1].key], false)
+		incrementStreak(players[match.white.key], true)
+		incrementStreak(players[match.black.key], false)
 
 	promises = []
 	promises.push db.removeGame(id)
@@ -115,10 +109,8 @@ resetPlayers = (players) ->
 # @param [Object] lastMatch
 removeLast = (id, lastMatch, cb) ->
 	console.log('remove last')
-	rollBackPlayer(lastMatch.winners[0])
-	rollBackPlayer(lastMatch.winners[1])
-	rollBackPlayer(lastMatch.losers[0])
-	rollBackPlayer(lastMatch.losers[1])
+	rollBackPlayer(lastMatch.white)
+	rollBackPlayer(lastMatch.black)
 
 	db.removeGame(id).then(() ->
 		cb?("Success")
