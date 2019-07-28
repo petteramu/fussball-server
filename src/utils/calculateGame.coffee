@@ -17,9 +17,11 @@ calculateGame = (game) ->
 	{ whiteProbability, blackProbability } = getPlayerProbability(whiteRating, blackRating)
 
 	newWhiteElo = getNewRating(whiteRating, getScoreForPlayer('white', game.winner), whiteProbability)
+	whiteChange = newWhiteElo - whiteRating
 	whiteGain = if game.winner is 'white' then newWhiteElo - whiteRating else whiteRating - newWhiteElo
 
 	newBlackElo = getNewRating(blackRating, getScoreForPlayer('black', game.winner), blackProbability)
+	blackChange = newBlackElo - blackRating
 	blackGain = if game.winner is 'black' then newBlackElo - blackRating else blackRating - newBlackElo
 
 	timestamp = new Date().getTime()
@@ -29,13 +31,11 @@ calculateGame = (game) ->
 		winner: game.winner
 		white:
 			key: game.white
-			gain: if whiteRating <= newWhiteElo then whiteGain else undefined
-			loss: if whiteRating > newWhiteElo then whiteGain else undefined
+			change: whiteChange
 			preRanking: whiteRating
 		black:
 			key: game.black
-			gain: if blackRating <= newBlackElo then blackGain else undefined
-			loss: if blackRating > newBlackElo then blackGain else undefined
+			change: blackChange
 			preRanking: blackRating
 
 	return { newGame, newWhiteElo, newBlackElo }
