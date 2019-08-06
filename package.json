@@ -4,23 +4,32 @@
   "description": "",
   "main": "gruntfile.js",
   "dependencies": {
+    "aws-sdk": "^2.501.0",
+    "chai": "^4.2.0",
     "firebase": "^4.7.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-coffee": "^2.0.0",
     "grunt-contrib-compress": "^1.4.3",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-run": "^0.8.0"
+    "grunt-run": "^0.8.0",
+    "lodash": "^4.17.15",
+    "mocha": "^6.2.0",
+    "serverless-offline": "^5.8.0",
+    "sinon": "^7.3.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "chai-as-promised": "^7.1.1",
     "grunt": "^1.0.1",
     "grunt-contrib-coffee": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-run": "^0.8.0"
+    "grunt-run": "^0.8.0",
+    "request": "^2.88.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --recursive --watch src/test"
   },
   "author": "Petter Amundsen",
   "license": "ISC"

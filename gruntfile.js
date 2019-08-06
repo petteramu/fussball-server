@@ -18,11 +18,14 @@ module.exports = function(grunt) {
     },
     copy: {
       main: {
-        files: [{expand: true, cwd: './src/', src: './**/*.json', dest: './build'}]
+        files: [
+          {expand: true, cwd: './src/', src: './**/*.json', dest: './build'},
+          {expand: true, cwd: './src/', src: './**/*.js', dest: './build'}
+        ]
       }
     },
     watch: {
-      files: ['src/**/*.coffee', 'src/**/*.json'],
+      files: ['src/**/*.coffee', 'src/**/*.json', 'src/**/*.js'],
       tasks: ['coffee', 'copy', 'run']
     },
     run: {

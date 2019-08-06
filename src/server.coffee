@@ -2,6 +2,7 @@ db = require './database'
 addGame = require './actions/addGame'
 addPlayer = require './actions/addPlayer'
 removeGame = require './actions/removeGame'
+createResponse = require './utils/createResponse'
 
 delegate = (e, context, callback) ->
 	context?.callbackWaitsForEmptyEventLoop = false
@@ -46,16 +47,5 @@ delegate = (e, context, callback) ->
 	catch err
 		console.log(err)
 		callback?(createResponse(err))
-
-createResponse = (msg) ->
-	body = msg
-
-	response =
-		headers:
-			"Access-Control-Allow-Origin": "http://petteramu.com"
-		statusCode: 200
-		body: JSON.stringify(body)
-
-	return response
 
 module.exports.handler = delegate

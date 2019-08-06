@@ -167,7 +167,8 @@ class Database
 	# @return [Object]
 	# @private
 	_getConfig: ->
-		if process.argv[2] is "debug"
+		console.log(process.argv)
+		if process.argv.indexOf("-debug") > -1
 			console.log "using debug version"
 			return firebaseConfig
 

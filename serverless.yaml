@@ -1,0 +1,147 @@
+service: Nf6Chill
+tenant: petteramu
+app: nf6-chill
+
+custom:
+  GAMES_TABLE: "${self:service}_games_${self:provider.stage}"
+  RANKINGS_TABLE: "${self:service}_rankings_${self:provider.stage}"
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: eu-central-1
+  tags:
+    service: Nf6Chill
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.GAMES_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.RANKINGS_TABLE}"
+
+functions:
+  addGame:
+    handler: src/actions/addGame.handler
+    memorySize: 128
+    description: Adds a game to the games table
+    environment:
+      GAMES_TABLE: ${self:custom.GAMES_TABLE}
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+    events:
+      - http:
+          path: game
+          method: post
+          cors: true
+  addRawGame:
+    handler: src/actions/addRawGame.handler
+    memorySize: 128
+    description: Adds a raw game to the games table
+    environment:
+      GAMES_TABLE: ${self:custom.GAMES_TABLE}
+    events:
+      - http:
+          path: rawgame
+          method: post
+          cors: true
+  addPlayer:
+    handler: src/actions/addPlayer.handler
+    memorySize: 128
+    description: Adds a player to the rankings table
+    environment:
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+    events:
+      - http:
+          path: player
+          method: post
+          cors: true
+  addRawPlayer:
+    handler: src/actions/addRawPlayer.handler
+    memorySize: 128
+    description: Adds a raw player to the rankings table
+    environment:
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+    events:
+      - http:
+          path: rawplayer
+          method: post
+          cors: true
+  getRankings:
+    handler: src/actions/getRankings.handler
+    memorySize: 128
+    description: Lists the rankings
+    environment:
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+    events:
+      - http:
+          path: rankings
+          method: get
+          cors: true
+  getGames:
+    handler: src/actions/getGames.handler
+    memorySize: 128
+    description: Lists games
+    environment:
+      GAMES_TABLE: ${self:custom.GAMES_TABLE}
+    events:
+      - http:
+          path: games
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    GamesTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:custom.GAMES_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+          -
+            AttributeName: timestamp
+            AttributeType: N
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+          -
+            AttributeName: timestamp
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    RankingsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:custom.RANKINGS_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: name
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: name
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
