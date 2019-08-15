@@ -91,7 +91,6 @@ class DynamoDBProvider {
     // @param [Object] updateObject
     // @return Promise
     updateItemSimple (tableName, keys, updateObject) {
-        console.log(keys, updateObject)
         if(typeof tableName !== 'string')
             return Promise.reject('First argument needs to be a string')
         
@@ -103,7 +102,6 @@ class DynamoDBProvider {
 
         try {     
             var generatedExpression = this._createUpdateExpression(updateObject)
-            console.log(generatedExpression)
         }
         catch (e) {
             return Promise.reject(e)

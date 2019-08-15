@@ -25,7 +25,8 @@ const PLAYER_TABLE_SCHEMA = {
     ranking: 'N',
     peak: 'N',
     wins: 'N',
-    losses: 'N'
+    losses: 'N',
+    remis: 'N'
 }
 
 module.exports = {

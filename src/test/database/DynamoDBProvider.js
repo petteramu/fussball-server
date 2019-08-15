@@ -300,9 +300,9 @@ describe('DynamoDB Provider', function() {
         })
 
         it('should generate valid expressions', async function () {
-            await provider.updateItemSimple(TABLE_NAME, KEYS, JSON.parse("{\"lastUpdated\":1563643252459,\"losses\":4,\"ranking\":1141.4902160935137,\"streak\":-4,\"wins\":0,\"name\":\"vidar olsnes\"}"))
-            updateExpressionIsCorrect = provider.docClient.update.getCall(0).args[0].UpdateExpression === 'set a = :0, b.c = :1'
-            attributeValuesIsCorrect = provider.docClient.update.getCall(0).args[0].ExpressionAttributeValues[':0'] === 2
+            await provider.updateItemSimple(TABLE_NAME, KEYS, { lastUpdated: 1563643252459, losses: 4, ranking: 1141, streak: -4, wins: 0, name: "vidar olsnes"})
+            updateExpressionIsCorrect = provider.docClient.update.getCall(0).args[0].UpdateExpression === 'set lastUpdated = :0, losses = :1, ranking = :2, streak = :3, wins = :4, name = :5'
+            attributeValuesIsCorrect = provider.docClient.update.getCall(0).args[0].ExpressionAttributeValues[':0'] === 1563643252459
             assert(updateExpressionIsCorrect && attributeValuesIsCorrect)
         })
 

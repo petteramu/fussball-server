@@ -1,4 +1,4 @@
-const createResponse = function (msg) {
+const createResponse = function (msg, statusCode = 200) {
     let body = msg
 
     let response = {
@@ -6,7 +6,7 @@ const createResponse = function (msg) {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Credentials": true
         },
-        statusCode: 200,
+        statusCode: statusCode,
         body: JSON.stringify(body)
     }
     return response

@@ -3,8 +3,7 @@ const _ = require('lodash')
 const DynamoDBProviderFactory = require('./DynamoDBProvider')
 const { PLAYER_TABLE_SCHEMA } = require('./DynamoDBProviderEnums')
 
-const GAMES_TABLE = process.env.GAMES_TABLE
-const RANKINGS_TABLE = process.env.RANKINGS_TABLE
+const { GAMES_TABLE, RANKINGS_TABLE, TOURNAMENT_TABLE } = process.env
 
 class DynamoDBRepositoryFactory {
     getInstance () {
@@ -49,7 +48,6 @@ class DynamoDBRepository {
      * @return [Promise]
      */
     addGame (gameObject) {
-        console.log(gameObject)
         if(!gameObject) {
             throw new Error("DDBRepository.addGame gameObject undefined")
         }
@@ -92,6 +90,44 @@ class DynamoDBRepository {
 
     removeGame (id) {
 
+    }
+
+    addTournament (tournament) {
+        if(!tournament) {
+            throw new Error("No data received")
+        }
+        if(!tournament.tournamentName) {
+            throw new Error("No name given to tournament")
+        }
+        if(!tournament.players || !Array.isArray(tournament.players)) {
+            throw new Error("No players given to tournament")
+        }
+        if(!tournament.options) {
+            throw new Error("No options given to tournament")
+        }
+        if(typeof tournament.options.double !== "boolean") {
+            throw new Error("Double option must be a boolean")
+        }
+        if(!tournament.matches || !Array.isArray(tournament.matches)) {
+            throw new Error("No matches given to tournament")
+        }
+
+        return this.provider.createItem(TOURNAMENT_TABLE, tournament)
+    }
+
+    async getTournamentsOverview () {
+        let result = await this.provider.scan(TOURNAMENT_TABLE, { ProjectionExpression: 'id, tournamentName, created' })
+        return result
+    }
+
+    async getTournament (id) {
+        let result = await this.provider.getItem(TOURNAMENT_TABLE, { id })
+        return result
+    }
+
+    async getGame (id) {
+        let result = await this.provider.getItem(GAMES_TABLE, { id })
+        return result
     }
 
     getGames (count = -1, playerOne, playerTwo) {

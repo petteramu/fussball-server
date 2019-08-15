@@ -37,6 +37,18 @@
             "dynamodb:DeleteItem"
           ],
           "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_rankings_dev"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:Query",
+            "dynamodb:Scan",
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem"
+          ],
+          "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_tournaments_dev"
         }
       ],
       "versionFunctions": true,
@@ -93,6 +105,24 @@
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/Nf6Chill-dev-getGames"
+            }
+          },
+          "CreateTournamentLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-createTournament"
+            }
+          },
+          "GetTournamentLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-getTournament"
+            }
+          },
+          "GetTournamentsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-getTournaments"
             }
           },
           "IamRoleLambdaExecution": {
@@ -156,6 +186,9 @@
                       },
                       {
                         "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][1]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][2]"
                       }
                     ]
                   }
@@ -244,6 +277,24 @@
                               "GetGamesLogGroup",
                               "Arn"
                             ]
+                          },
+                          {
+                            "Fn::GetAtt": [
+                              "CreateTournamentLogGroup",
+                              "Arn"
+                            ]
+                          },
+                          {
+                            "Fn::GetAtt": [
+                              "GetTournamentLogGroup",
+                              "Arn"
+                            ]
+                          },
+                          {
+                            "Fn::GetAtt": [
+                              "GetTournamentsLogGroup",
+                              "Arn"
+                            ]
                           }
                         ]
                       }
@@ -260,7 +311,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/dev/1565021103142-2019-08-05T16:05:03.142Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
               },
               "FunctionName": "Nf6Chill-dev-addGame",
               "Handler": "s_addGame.handler",
@@ -292,14 +343,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "AddGameLambdaVersionkjEP7XqSI61tkpyBe5sK8LkK7yoq5gsf4QoNxwbPAQ": {
+          "AddGameLambdaVersion1alwOud8AS7QpkYDhBYjI64eyCJTRkPtCFcKqg7S68": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AddGameLambdaFunction"
               },
-              "CodeSha256": "YE4M1TXuGhgmEcY8U9RFQdHnIWZ60KoLUgjpM18ir0c=",
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
               "Description": "Adds a game to the games table"
             }
           },
@@ -310,7 +361,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/dev/1565021103142-2019-08-05T16:05:03.142Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
               },
               "FunctionName": "Nf6Chill-dev-addRawGame",
               "Handler": "s_addRawGame.handler",
@@ -341,14 +392,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "AddRawGameLambdaVersion5GDlkOu7d3cDnu94NLtfgCIgRGAhnQhVJr6yvUe18A8": {
+          "AddRawGameLambdaVersionUhCu9wetgfEy8HLVTPYpwvZkgxNnLOP5TmlH7s6kzPw": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AddRawGameLambdaFunction"
               },
-              "CodeSha256": "YE4M1TXuGhgmEcY8U9RFQdHnIWZ60KoLUgjpM18ir0c=",
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
               "Description": "Adds a raw game to the games table"
             }
           },
@@ -359,7 +410,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/dev/1565021103142-2019-08-05T16:05:03.142Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
               },
               "FunctionName": "Nf6Chill-dev-addPlayer",
               "Handler": "s_addPlayer.handler",
@@ -390,14 +441,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "AddPlayerLambdaVersionxXSXVbN1uD6zsSgaOUxFW3DOfFVz1o61e91W1nsIz8": {
+          "AddPlayerLambdaVersioncPVkIVxfa9fjssBj0Gd5eYbPhvzYVF0wcwOYIfbmnQk": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AddPlayerLambdaFunction"
               },
-              "CodeSha256": "YE4M1TXuGhgmEcY8U9RFQdHnIWZ60KoLUgjpM18ir0c=",
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
               "Description": "Adds a player to the rankings table"
             }
           },
@@ -408,7 +459,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/dev/1565021103142-2019-08-05T16:05:03.142Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
               },
               "FunctionName": "Nf6Chill-dev-addRawPlayer",
               "Handler": "s_addRawPlayer.handler",
@@ -439,14 +490,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "AddRawPlayerLambdaVersionM4002ahKuDkiksgXKZdbahtWPiQ5jAqSEa9f2e5lE": {
+          "AddRawPlayerLambdaVersionPXT4SLpevH2YWIO2Gx42p8xEakmGZD56OkOX2XaG4E4": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AddRawPlayerLambdaFunction"
               },
-              "CodeSha256": "YE4M1TXuGhgmEcY8U9RFQdHnIWZ60KoLUgjpM18ir0c=",
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
               "Description": "Adds a raw player to the rankings table"
             }
           },
@@ -457,7 +508,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/dev/1565021103142-2019-08-05T16:05:03.142Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
               },
               "FunctionName": "Nf6Chill-dev-getRankings",
               "Handler": "s_getRankings.handler",
@@ -488,14 +539,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "GetRankingsLambdaVersionlkFnG6v6nc51U31PaLyHYtKgCghcQckAm3jLiKEJiIY": {
+          "GetRankingsLambdaVersiono2oGCrzBrZKwxSy464wZWNZdo89rZekjH9vBeCVHpDQ": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetRankingsLambdaFunction"
               },
-              "CodeSha256": "YE4M1TXuGhgmEcY8U9RFQdHnIWZ60KoLUgjpM18ir0c=",
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
               "Description": "Lists the rankings"
             }
           },
@@ -506,7 +557,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/dev/1565021103142-2019-08-05T16:05:03.142Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
               },
               "FunctionName": "Nf6Chill-dev-getGames",
               "Handler": "s_getGames.handler",
@@ -537,15 +588,163 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "GetGamesLambdaVersionO5JNaMWG2ZLmOEUtsto0EzNzloPpP67pQb5vRytHuU": {
+          "GetGamesLambdaVersion0bYuzVdNxT9lnSA381mBv8QIRrheXdjNZDCYqQxYE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetGamesLambdaFunction"
               },
-              "CodeSha256": "YE4M1TXuGhgmEcY8U9RFQdHnIWZ60KoLUgjpM18ir0c=",
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
               "Description": "Lists games"
+            }
+          },
+          "CreateTournamentLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
+              },
+              "FunctionName": "Nf6Chill-dev-createTournament",
+              "Handler": "s_createTournament.handler",
+              "MemorySize": 128,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs8.10",
+              "Timeout": 6,
+              "Description": "Creates a new tournament",
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev",
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
+                }
+              }
+            },
+            "DependsOn": [
+              "CreateTournamentLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "CreateTournamentLambdaVersionVnpeJn8mqtgqI2Cv7xfGXLBCz3G4b8J2czCKPRJaQ": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateTournamentLambdaFunction"
+              },
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
+              "Description": "Creates a new tournament"
+            }
+          },
+          "GetTournamentLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
+              },
+              "FunctionName": "Nf6Chill-dev-getTournament",
+              "Handler": "s_getTournament.handler",
+              "MemorySize": 128,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs8.10",
+              "Timeout": 6,
+              "Description": "Returns a specific tournament",
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
+                }
+              }
+            },
+            "DependsOn": [
+              "GetTournamentLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "GetTournamentLambdaVersionD1INAMae8fpCuXYdzlVZEWVWZFpaYMNbPZowfyndw": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetTournamentLambdaFunction"
+              },
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
+              "Description": "Returns a specific tournament"
+            }
+          },
+          "GetTournamentsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z/Nf6Chill.zip"
+              },
+              "FunctionName": "Nf6Chill-dev-getTournaments",
+              "Handler": "s_getTournaments.handler",
+              "MemorySize": 128,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs8.10",
+              "Timeout": 6,
+              "Description": "Returns all tournaments",
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
+                }
+              }
+            },
+            "DependsOn": [
+              "GetTournamentsLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "GetTournamentsLambdaVersionjN3afsG9KMWbNP6aHAIL9tSlVUlIsoxsTIPaNLyx4g": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetTournamentsLambdaFunction"
+              },
+              "CodeSha256": "mHCT1qtVyfCaBlGTAXh0RfZTPm/2U8kxspUS9rR9SGk=",
+              "Description": "Returns all tournaments"
             }
           },
           "ApiGatewayRestApi": {
@@ -644,6 +843,36 @@
                 ]
               },
               "PathPart": "games",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceTournament": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "tournament",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceTournaments": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "tournaments",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -931,6 +1160,100 @@
               }
             }
           },
+          "ApiGatewayMethodTournamentOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true,
+                    "method.response.header.Access-Control-Allow-Credentials": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,POST'",
+                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceTournament"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodTournamentsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true,
+                    "method.response.header.Access-Control-Allow-Credentials": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'",
+                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceTournaments"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
           "ApiGatewayMethodGamePost": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
@@ -1189,7 +1512,136 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayDeployment1565021047563": {
+          "ApiGatewayMethodTournamentPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceTournament"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "CreateTournamentLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            }
+          },
+          "ApiGatewayMethodTournamentGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceTournament"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetTournamentLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            }
+          },
+          "ApiGatewayMethodTournamentsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceTournaments"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetTournamentsLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            }
+          },
+          "ApiGatewayDeployment1565545932438": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -1204,12 +1656,17 @@
               "ApiGatewayMethodRawplayerOptions",
               "ApiGatewayMethodRankingsOptions",
               "ApiGatewayMethodGamesOptions",
+              "ApiGatewayMethodTournamentOptions",
+              "ApiGatewayMethodTournamentsOptions",
               "ApiGatewayMethodGamePost",
               "ApiGatewayMethodRawgamePost",
               "ApiGatewayMethodPlayerPost",
               "ApiGatewayMethodRawplayerPost",
               "ApiGatewayMethodRankingsGet",
-              "ApiGatewayMethodGamesGet"
+              "ApiGatewayMethodGamesGet",
+              "ApiGatewayMethodTournamentPost",
+              "ApiGatewayMethodTournamentGet",
+              "ApiGatewayMethodTournamentsGet"
             ]
           },
           "AddGameLambdaPermissionApiGateway": {
@@ -1434,6 +1891,117 @@
               }
             }
           },
+          "CreateTournamentLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreateTournamentLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GetTournamentLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetTournamentLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GetTournamentsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetTournamentsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
           "ApiGatewayLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
@@ -1543,6 +2111,37 @@
               }
             }
           },
+          "TournamentTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "TableName": "Nf6Chill_tournaments_dev",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "created",
+                  "AttributeType": "N"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "created",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              }
+            }
+          },
           "CloudWatchLogsSubscriptionFilterAddGameLogGroup": {
             "Type": "AWS::Logs::SubscriptionFilter",
             "Properties": {
@@ -1603,6 +2202,36 @@
               }
             }
           },
+          "CloudWatchLogsSubscriptionFilterCreateTournamentLogGroup": {
+            "Type": "AWS::Logs::SubscriptionFilter",
+            "Properties": {
+              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#dev",
+              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
+              "LogGroupName": {
+                "Ref": "CreateTournamentLogGroup"
+              }
+            }
+          },
+          "CloudWatchLogsSubscriptionFilterGetTournamentLogGroup": {
+            "Type": "AWS::Logs::SubscriptionFilter",
+            "Properties": {
+              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#dev",
+              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
+              "LogGroupName": {
+                "Ref": "GetTournamentLogGroup"
+              }
+            }
+          },
+          "CloudWatchLogsSubscriptionFilterGetTournamentsLogGroup": {
+            "Type": "AWS::Logs::SubscriptionFilter",
+            "Properties": {
+              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#dev",
+              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
+              "LogGroupName": {
+                "Ref": "GetTournamentsLogGroup"
+              }
+            }
+          },
           "CloudWatchLogsSubscriptionFilterApiGatewayLogGroup": {
             "Type": "AWS::Logs::SubscriptionFilter",
             "Properties": {
@@ -1631,37 +2260,55 @@
           "AddGameLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddGameLambdaVersionkjEP7XqSI61tkpyBe5sK8LkK7yoq5gsf4QoNxwbPAQ"
+              "Ref": "AddGameLambdaVersion1alwOud8AS7QpkYDhBYjI64eyCJTRkPtCFcKqg7S68"
             }
           },
           "AddRawGameLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddRawGameLambdaVersion5GDlkOu7d3cDnu94NLtfgCIgRGAhnQhVJr6yvUe18A8"
+              "Ref": "AddRawGameLambdaVersionUhCu9wetgfEy8HLVTPYpwvZkgxNnLOP5TmlH7s6kzPw"
             }
           },
           "AddPlayerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddPlayerLambdaVersionxXSXVbN1uD6zsSgaOUxFW3DOfFVz1o61e91W1nsIz8"
+              "Ref": "AddPlayerLambdaVersioncPVkIVxfa9fjssBj0Gd5eYbPhvzYVF0wcwOYIfbmnQk"
             }
           },
           "AddRawPlayerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddRawPlayerLambdaVersionM4002ahKuDkiksgXKZdbahtWPiQ5jAqSEa9f2e5lE"
+              "Ref": "AddRawPlayerLambdaVersionPXT4SLpevH2YWIO2Gx42p8xEakmGZD56OkOX2XaG4E4"
             }
           },
           "GetRankingsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetRankingsLambdaVersionlkFnG6v6nc51U31PaLyHYtKgCghcQckAm3jLiKEJiIY"
+              "Ref": "GetRankingsLambdaVersiono2oGCrzBrZKwxSy464wZWNZdo89rZekjH9vBeCVHpDQ"
             }
           },
           "GetGamesLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetGamesLambdaVersionO5JNaMWG2ZLmOEUtsto0EzNzloPpP67pQb5vRytHuU"
+              "Ref": "GetGamesLambdaVersion0bYuzVdNxT9lnSA381mBv8QIRrheXdjNZDCYqQxYE"
+            }
+          },
+          "CreateTournamentLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateTournamentLambdaVersionVnpeJn8mqtgqI2Cv7xfGXLBCz3G4b8J2czCKPRJaQ"
+            }
+          },
+          "GetTournamentLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetTournamentLambdaVersionD1INAMae8fpCuXYdzlVZEWVWZFpaYMNbPZowfyndw"
+            }
+          },
+          "GetTournamentsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetTournamentsLambdaVersionjN3afsG9KMWbNP6aHAIL9tSlVUlIsoxsTIPaNLyx4g"
             }
           },
           "ServiceEndpoint": {
@@ -1725,7 +2372,8 @@
     },
     "custom": {
       "GAMES_TABLE": "Nf6Chill_games_dev",
-      "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
+      "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+      "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
     },
     "plugins": [
       "serverless-offline"
@@ -1984,6 +2632,133 @@
         "timeout": 6,
         "runtime": "nodejs8.10",
         "vpc": {}
+      },
+      "createTournament": {
+        "handler": "s_createTournament.handler",
+        "memorySize": 128,
+        "description": "Creates a new tournament",
+        "environment": {
+          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev",
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "tournament",
+              "method": "post",
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "Nf6Chill-dev-createTournament",
+        "package": {},
+        "memory": 128,
+        "timeout": 6,
+        "runtime": "nodejs8.10",
+        "vpc": {}
+      },
+      "getTournament": {
+        "handler": "s_getTournament.handler",
+        "memorySize": 128,
+        "description": "Returns a specific tournament",
+        "environment": {
+          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "tournament",
+              "method": "get",
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "Nf6Chill-dev-getTournament",
+        "package": {},
+        "memory": 128,
+        "timeout": 6,
+        "runtime": "nodejs8.10",
+        "vpc": {}
+      },
+      "getTournaments": {
+        "handler": "s_getTournaments.handler",
+        "memorySize": 128,
+        "description": "Returns all tournaments",
+        "environment": {
+          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "tournaments",
+              "method": "get",
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "Nf6Chill-dev-getTournaments",
+        "package": {},
+        "memory": 128,
+        "timeout": 6,
+        "runtime": "nodejs8.10",
+        "vpc": {}
       }
     },
     "resources": {
@@ -2041,6 +2816,37 @@
               "WriteCapacityUnits": 1
             }
           }
+        },
+        "TournamentTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "TableName": "Nf6Chill_tournaments_dev",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "created",
+                "AttributeType": "N"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "created",
+                "KeyType": "RANGE"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            }
+          }
         }
       },
       "Outputs": {}
@@ -2054,7 +2860,7 @@
     "artifact": "E:\\Projects\\Fussball-server\\.serverless\\Nf6Chill.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/Nf6Chill/dev/1565021103142-2019-08-05T16:05:03.142Z",
+    "artifactDirectoryName": "serverless/Nf6Chill/dev/1565545968930-2019-08-11T17:52:48.930Z",
     "artifact": "Nf6Chill.zip"
   }
 }

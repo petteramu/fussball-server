@@ -8,7 +8,6 @@ const DEFAULT_KFACTOR = process.env.kfactor || 32
 // @param [Object]
 // @return [Object]
 async function calculateGame (game) {
-	console.log(game)
 	await _validateGame(game)
 
 	let whiteRating = await getRating(game.white)
@@ -25,7 +24,7 @@ async function calculateGame (game) {
 	let timestamp = new Date().getTime()
 
 	let newGame = {
-		id: uuid(),
+		id: (game.id !== undefined) ? game.id : uuid(),
 		timestamp: timestamp,
 		winner: game.winner,
 		white: {

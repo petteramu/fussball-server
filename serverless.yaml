@@ -5,6 +5,7 @@ app: nf6-chill
 custom:
   GAMES_TABLE: "${self:service}_games_${self:provider.stage}"
   RANKINGS_TABLE: "${self:service}_rankings_${self:provider.stage}"
+  TOURNAMENT_TABLE: "${self:service}_tournaments_${self:provider.stage}"
 
 plugins:
   - serverless-offline
@@ -35,6 +36,15 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.RANKINGS_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.TOURNAMENT_TABLE}"
 
 functions:
   addGame:
@@ -104,6 +114,40 @@ functions:
           path: games
           method: get
           cors: true
+  createTournament:
+    handler: src/actions/createTournament.handler
+    memorySize: 128
+    description: Creates a new tournament
+    environment:
+      TOURNAMENT_TABLE: ${self:custom.TOURNAMENT_TABLE}
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+    events:
+      - http:
+          path: tournament
+          method: post
+          cors: true
+  getTournament:
+    handler: src/actions/getTournament.handler
+    memorySize: 128
+    description: Returns a specific tournament
+    environment:
+      TOURNAMENT_TABLE: ${self:custom.TOURNAMENT_TABLE}
+    events:
+      - http:
+          path: tournament
+          method: get
+          cors: true
+  getTournaments:
+    handler: src/actions/getTournaments.handler
+    memorySize: 128
+    description: Returns all tournaments
+    environment:
+      TOURNAMENT_TABLE: ${self:custom.TOURNAMENT_TABLE}
+    events:
+      - http:
+          path: tournaments
+          method: get
+          cors: true
 
 resources:
   Resources:
@@ -142,6 +186,28 @@ resources:
           -
             AttributeName: name
             KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    TournamentTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:custom.TOURNAMENT_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+          - 
+            AttributeName: created
+            AttributeType: N
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+          -
+            AttributeName: created
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

@@ -12,8 +12,8 @@ firebase.onInitialized(() => {
     let matches = modifyMatches(firebase.getMatches())
     let players = modifyPlayers(firebase.getPlayers())
 
-    for(let i = 0; i < matches.length; i++) {
-        staggeredMatchAdd(matches[i], i, matches.length)
+    for(let i = 0; i < players.length; i++) {
+        staggeredPlayersAdd(players[i], i, players.length)
     }
 })
 
@@ -21,12 +21,12 @@ function staggeredMatchAdd (match, index, max) {
     setTimeout(() => {
         try {
             request.post(
-                'https://e5xbxwe7dk.execute-api.eu-central-1.amazonaws.com/dev/rawgame',
+                'https://puxfq2igvg.execute-api.eu-central-1.amazonaws.com/dev/rawgame',
                 { json: match },
                 function(err, res) {
                     if(err) {
                         console.log(match)
-                        console.log(e)
+                        console.log(err)
                         process.exit()
                     }
                     console.clear()
@@ -49,7 +49,7 @@ function staggeredMatchAdd (match, index, max) {
 function staggeredPlayersAdd (player, index, max) {
     setTimeout(() => {
         request.post(
-            'https://e5xbxwe7dk.execute-api.eu-central-1.amazonaws.com/dev/rawplayer',
+            'https://puxfq2igvg.execute-api.eu-central-1.amazonaws.com/dev/rawplayer',
             { json: player },
             function(err, res) {
                 if(err) {
