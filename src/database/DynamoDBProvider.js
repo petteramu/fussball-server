@@ -59,7 +59,29 @@ class DynamoDBProvider {
 
         return this.docClient.put(params).promise()
     }
-    
+
+    // Batches get calls to fetch multiple items from multiple tables in a single
+    // request.
+    // @param [Object] RequestItems
+    // @return Promise
+    async batchGet (tables) {
+        if(typeof tables !== 'object') {
+            console.log(tables)
+            throw new Error("batchGet called with invalid parameters")
+        }
+        console.log(tables)
+        const RequestItems = _.mapValues(tables, (Keys) => { return { Keys } })
+        console.log(RequestItems)
+        const params = { RequestItems }
+        console.log(params)
+        let result = await this.docClient.batchGet(params).promise()
+
+        if(result === undefined || result === null || result.Responses === undefined || result.Responses === null)
+            return
+        
+        return result.Responses
+    }
+
     // Get an Item from the database
     // @param [String] tableName The name of the table to get the item from
     // @param [Object] keys The keys of the item to get
@@ -76,10 +98,10 @@ class DynamoDBProvider {
             Key: keys
         }
 
-       let result = await this.docClient.get(params).promise()
+        let result = await this.docClient.get(params).promise()
 
-       if(result === undefined || result === null || result.Item === undefined || result.Item === null)
-           return
+        if(result === undefined || result === null || result.Item === undefined || result.Item === null)
+            return
 
         return result.Item
     }
@@ -228,7 +250,10 @@ class DynamoDBProvider {
             params.ProjectionExpression = scanObject.ProjectionExpression
         
         if (scanObject && scanObject.FilterExpression)
-            params.FilterExpression = scanObject.FilterExpression 
+            params.FilterExpression = scanObject.FilterExpression
+        
+        if (scanObject && scanObject.ExpressionAttributeValues)
+            params.ExpressionAttributeValues = scanObject.ExpressionAttributeValues
 
         let result = await this.docClient.scan(params).promise()
         if(result && _.isArray(result.Items))

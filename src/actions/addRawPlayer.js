@@ -1,7 +1,7 @@
 const dbFactory = require('../database/DynamoDBRepository')
 const db = dbFactory.getInstance()
 const createResponse = require('../utils/createResponse')
-const uuid = require('uuid/v1')
+const uuid = require('uuid/v4')
 
 const handler = async function (e, context) {
 	console.log('EVENT: \n', JSON.stringify(e))

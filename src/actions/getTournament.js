@@ -19,7 +19,8 @@ const handler = async function (e, context) {
 
         let tournament = await db.getTournament(id)
         if(tournament) {
-            mergePlayedMatches(tournament)
+            await mergePlayedMatches(tournament)
+            calculateStandings(tournament)
             return createResponse(tournament)
         }
         else
@@ -31,15 +32,63 @@ const handler = async function (e, context) {
     }
 }
 
+function calculateStandings(tournament) {
+    for(let i = 0; i < tournament.players.length; i++) {
+        const player = tournament.players[i]
+        let matches = _.flatten(tournament.matches).filter((match) => match.white.key === player || match.black.key === player)
+        let wins = matches.filter((match) => {
+            let playerColor = (match.white.key === player) ? 'white' : 'black'
+            return match.winner === playerColor
+        }).length
+        let losses = matches.filter((match) => {
+            let playerColor = (match.white.key === player) ? 'white' : 'black'
+            return match.winner !== playerColor && match.winner !== 'remis'
+        }).length
+        let remis = matches.filter(match => match.winner === 'remis').length
+        let points = (wins + remis / 2)
+        const standingObject = {
+            name: player,
+            wins,
+            losses,
+            remis,
+            points
+        }
+        tournament.players[i] = standingObject
+    }
+}
+
 async function mergePlayedMatches(tournament) {
-    for(let index in tournament.matches) {
-        let tempMatch = tournament.matches[index]
-        let match = await db.getGame(tempMatch.id)
-        if(match) {
-            match.round = tempMatch.round
-            tournament.matches[index] = match
+    const matchIds = tournament.matches.map(match => match.id)
+    let playedMatches = await db.getGamesById(matchIds)
+    let rounds = []
+
+    console.log('tournament', tournament)
+    console.log('playedMatches', playedMatches)
+
+    // Insert data from the played matches into the scheduled matches from the tournament table
+    for(let i = 0; i < tournament.matches.length; i++) {
+        let match = tournament.matches[i]
+        let playedMatch = _.find(playedMatches, played => played.id === match.id)
+        
+        // Define round if not already existing
+        let roundNumber = match.round - 1 //To start off at index 0
+        if(rounds[roundNumber] == undefined) {
+            rounds[roundNumber] = []
+        }
+        let round = rounds[roundNumber]
+
+        if(playedMatch)
+            round.push(playedMatch)
+        else {
+            // Standardize matches' player structure
+            match.white = { key: tournament.matches[i].white }
+            match.black = { key: tournament.matches[i].black }
+            round.push(match)
         }
     }
+    // Replace tournament.matches since we don't want them in the response
+    tournament.matches = rounds
+    return tournament
 }
 
 module.exports.handler = handler

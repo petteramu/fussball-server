@@ -1,7 +1,7 @@
 const createResponse = require('../utils/createResponse')
 const createSchedule = require('../utils/roundRobin')
 const db = require('../database/DynamoDBRepository').getInstance()
-const uuid = require('uuid/v1')
+const uuid = require('uuid/v4')
 
 const handler = async function (e, context) {
     console.log('Event: \n', JSON.stringify(e))

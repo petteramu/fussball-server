@@ -3,7 +3,7 @@ process.env.GAMES_TABLE = 'Nf6Chill_games_dev'
 process.env.RANKINGS_TABLE = 'Nf6Chill_rankings_dev'
 process.env.AWS_REGION = 'eu-central-1'
 process.env.DDB_ENDPOINT = 'arn:aws:dynamodb:eu-central-1:333453541777:table/'
-const uuid = require('uuid/v1')
+const uuid = require('uuid/v4')
 const request = require('request')
 
 const staggerMs = 200
@@ -12,8 +12,8 @@ firebase.onInitialized(() => {
     let matches = modifyMatches(firebase.getMatches())
     let players = modifyPlayers(firebase.getPlayers())
 
-    for(let i = 0; i < players.length; i++) {
-        staggeredPlayersAdd(players[i], i, players.length)
+    for(let i = 0; i < matches.length; i++) {
+        staggeredMatchAdd(matches[i], i, matches.length)
     }
 })
 
@@ -21,7 +21,7 @@ function staggeredMatchAdd (match, index, max) {
     setTimeout(() => {
         try {
             request.post(
-                'https://puxfq2igvg.execute-api.eu-central-1.amazonaws.com/dev/rawgame',
+                'https://jcse1uooda.execute-api.eu-central-1.amazonaws.com/dev/rawgame',
                 { json: match },
                 function(err, res) {
                     if(err) {
@@ -49,12 +49,12 @@ function staggeredMatchAdd (match, index, max) {
 function staggeredPlayersAdd (player, index, max) {
     setTimeout(() => {
         request.post(
-            'https://puxfq2igvg.execute-api.eu-central-1.amazonaws.com/dev/rawplayer',
+            'https://jcse1uooda.execute-api.eu-central-1.amazonaws.com/dev/rawplayer',
             { json: player },
             function(err, res) {
                 if(err) {
                     console.log(player)
-                    console.log(e)
+                    console.log(err)
                     process.exit()
                 }
                 console.clear()

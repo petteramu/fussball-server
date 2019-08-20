@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const dbFactory = require('../database/DynamoDBRepository')
 const db = dbFactory.getInstance()
-const uuid = require('uuid/v1')
+const uuid = require('uuid/v4')
 
 // Based on https://en.wikipedia.org/wiki/Round-robin_tournament#Scheduling_algorithm
 async function createRoundRobinSchedule(players, double, shuffle = true) {

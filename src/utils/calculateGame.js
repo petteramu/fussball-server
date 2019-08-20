@@ -1,6 +1,6 @@
 const db = require('../database/DynamoDBRepository').getInstance()
 const _ = require('lodash')
-const uuid = require('uuid/v1')
+const uuid = require('uuid/v4')
 
 const DEFAULT_KFACTOR = process.env.kfactor || 32
 

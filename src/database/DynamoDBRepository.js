@@ -121,8 +121,26 @@ class DynamoDBRepository {
     }
 
     async getTournament (id) {
-        let result = await this.provider.getItem(TOURNAMENT_TABLE, { id })
-        return result
+        let KeyConditionExpression = "id = :i"
+        let ExpressionAttributeValues = { ":i": id }
+        let result = await this.provider.query(TOURNAMENT_TABLE, { KeyConditionExpression, ExpressionAttributeValues })
+        if(!result || result.length === 0)
+            return undefined
+
+        // The tournament structure must be changed from having a single array of scheduled matches
+        // to having a two-dimensional array of rounds of matches, which includes already played matches
+        const tournament = result[0]
+        return tournament
+    }
+
+    async getGamesById (ids) {
+        ids = ids.map((id, index) => { return { id } })
+
+        const result = await this.provider.batchGet({ [GAMES_TABLE]: ids })
+        if(result) {
+            return result[GAMES_TABLE]
+        }
+        return undefined
     }
 
     async getGame (id) {
@@ -130,24 +148,10 @@ class DynamoDBRepository {
         return result
     }
 
-    getGames (count = -1, playerOne, playerTwo) {
+    getGames (count = -1) {
         let params = {}
         if(count > 0)
             params.limit = count
-        
-        if(playerOne) {
-            var filterExpression = '(white.key = :p1 or black.key = :p1)'
-            var attributeValues = {
-                ':p1': playerOne
-            }
-            if(playerTwo) {
-                filterExpression += ' and (white.key = :p2 or black.key = :p2)'
-                attributeValues[':p2'] = playerTwo
-            }
-        }
-
-        params.ExpressionAttributeValues = attributeValues
-        params.FilterExpression = filterExpression
 
         return this.provider.scan(GAMES_TABLE, params)
     }
