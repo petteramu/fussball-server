@@ -15,11 +15,11 @@ class DynamoDBRepositoryFactory {
     }
 
     getTestInstance () {
-        if(this.testInstance)
-            return this.testInstance
+        if(this.instance) 
+            return this.instance
 
-        this.testInstance = new DynamoDBRepository(DynamoDBProviderFactory.getTestInstance())
-        return this.testInstance
+        this.instance = new DynamoDBRepository(DynamoDBProviderFactory.getTestInstance())
+        return this.instance
     }
 }
 
@@ -88,8 +88,12 @@ class DynamoDBRepository {
         return this.provider.createItem(GAMES_TABLE, gameObject)
     }
 
-    removeGame (id) {
+    async removeGame (id) {
+        if(!id)
+            throw new Error("No id given to remove game")
 
+        let keys = { id }
+        await this.provider.deleteItem(GAMES_TABLE, keys)
     }
 
     addTournament (tournament) {
@@ -165,10 +169,10 @@ class DynamoDBRepository {
         return this.provider.scan(RANKINGS_TABLE, {})
     }
 
-    updatePlayer (playerKey, playerObject) {
+    async updatePlayer (playerKey, playerObject) {
         let dbKeys = { name: playerKey }
         let cleanedObject = _.pick(playerObject, Object.keys(PLAYER_TABLE_SCHEMA))
-        return this.provider.updateItemSimple(RANKINGS_TABLE, dbKeys, cleanedObject)
+        await this.provider.updateItemSimple(RANKINGS_TABLE, dbKeys, cleanedObject)
     }
 }
 
