@@ -10,8 +10,19 @@ const DEFAULT_KFACTOR = process.env.kfactor || 32
 async function calculateGame (game) {
 	await _validateGame(game)
 
-	let whiteRating = await getRating(game.white)
-	let blackRating = await getRating(game.black)
+	let whiteRating, blackRating, existingGame;
+	if(game.id !== undefined) {
+		existingGame = await db.getGame(game.id)
+		if(existingGame === undefined) {
+			throw new Error(`No game with id ${game.id} found. Cannot re-calculate game.`)
+		}
+		whiteRating = existingGame.white.preRanking
+		blackRating = existingGame.black.preRanking
+	}
+	else {
+		whiteRating = await getRating(game.white)
+		blackRating = await getRating(game.black)
+	}
 
 	let { whiteProbability, blackProbability } = getPlayerProbability(whiteRating, blackRating)
 
@@ -21,7 +32,7 @@ async function calculateGame (game) {
 	let newBlackElo = getNewRating(blackRating, getScoreForPlayer('black', game.winner), blackProbability)
 	let blackChange = newBlackElo - blackRating
 
-	let timestamp = new Date().getTime()
+	let timestamp = existingGame ? existingGame.timestamp : new Date().getTime()
 
 	let newGame = {
 		id: (game.id !== undefined) ? game.id : uuid(),
