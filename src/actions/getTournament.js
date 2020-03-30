@@ -42,7 +42,7 @@ function calculateStandings(tournament) {
         }).length
         let losses = matches.filter((match) => {
             let playerColor = (match.white.key === player) ? 'white' : 'black'
-            return match.winner !== playerColor && match.winner !== 'remis'
+            return match.winner && match.winner !== playerColor && match.winner !== 'remis'
         }).length
         let remis = matches.filter(match => match.winner === 'remis').length
         let points = (wins + remis / 2)
@@ -61,9 +61,6 @@ async function mergePlayedMatches(tournament) {
     const matchIds = tournament.matches.map(match => match.id)
     let playedMatches = await db.getGamesById(matchIds)
     let rounds = []
-
-    console.log('tournament', tournament)
-    console.log('playedMatches', playedMatches)
 
     // Insert data from the played matches into the scheduled matches from the tournament table
     for(let i = 0; i < tournament.matches.length; i++) {
