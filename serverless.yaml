@@ -13,7 +13,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: prod
+  stage: dev
   region: eu-central-1
   tags:
     service: Nf6Chill

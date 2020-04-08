@@ -67,7 +67,7 @@ const TEST_PLAYER = {
     ranking: 1200
 }
 
-describe.only('deleteGame', function() {
+describe('deleteGame', function() {
     describe('rollbackGame', function() {
         before(() => {
             sinon.stub(db, 'getPlayer').callsFake(() => TEST_PLAYER)
