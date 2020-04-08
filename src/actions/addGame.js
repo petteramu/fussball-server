@@ -2,6 +2,11 @@ const dbFactory = require('../database/DynamoDBRepository')
 const db = dbFactory.getInstance()
 const calculateGame = require('../utils/calculateGame')
 const createResponse = require('../utils/createResponse')
+const {
+	updateStatsFromRemis,
+	updateStatsFromWin,
+	updateStatsFromLoss
+} = require('../utils/stats.js')
 
 const handler = async function (e, context) {
 	console.log('EVENT: \n', JSON.stringify(e))
@@ -25,7 +30,15 @@ async function addGame (game) {
 	if(game && game.black && game.black.toLowerCase)
 		game.black  = game.black.toLowerCase()
 
-	let { newGame, newWhiteElo, newBlackElo } = await calculateGame(game)
+	let existingGame = null;
+	if(game.id !== undefined && game.id !== null) {
+		existingGame = await db.getGame(game.id)
+		if(existingGame === undefined) {
+			throw new Error(`No game with id ${game.id} found. Cannot re-calculate game.`)
+		}
+	}
+
+	let { newGame, newWhiteElo, newBlackElo } = await calculateGame(game, existingGame)
 
 	let promises = []
 	promises.push(db.addGame(newGame))
@@ -55,15 +68,7 @@ async function addGame (game) {
 // @param [Numerical] rating
 async function updateRemis (key, rating) {
 	let player = await db.getPlayer(key)
-	player.lastUpdated = new Date().getTime()
-	player.ranking = rating
-
-	if(player.peak == undefined || rating > player.peak)
-		player.peak = rating
-
-	player.streak = (player.streak) ? player.streak : 0
-	player.remis = (player.remis) ? player.remis : 0
-	player.remis++
+	updateStatsFromRemis(player, rating)
 	delete player.name // Remove id as we cannot change that(would result in an error from ddb)
 	return db.updatePlayer(key, player)
 }
@@ -73,17 +78,7 @@ async function updateRemis (key, rating) {
 // @param [Numerical] rating
 async function updateLoser (key, rating) {
 	let player = await db.getPlayer(key)
-	player.lastUpdated = new Date().getTime()
-	player.ranking = rating
-
-	player.streak = (player.streak) ? player.streak : 0
-	if (player.streak > 0)
-		player.streak = -1
-	else
-		player.streak--
-	
-	player.losses = (player.losses) ? player.losses : 0
-	player.losses++
+	updateStatsFromLoss(player, rating)
 	delete player.name // Remove id as we cannot change that(would result in an error from ddb)
 	return db.updatePlayer(key, player)
 }
@@ -92,20 +87,7 @@ async function updateLoser (key, rating) {
 // @param [Numerical] rating
 async function updateWinner (key, rating) {
 	let player = await db.getPlayer(key)
-	player.lastUpdated = new Date().getTime()
-	player.ranking = rating
-
-	if(player.peak == undefined || rating > player.peak)
-		player.peak = rating
-
-	player.streak = (player.streak) ? player.streak : 0
-	if (player.streak < 0)
-		player.streak = 1
-	else
-		player.streak++
-
-	player.wins = (player.wins) ? player.wins : 0
-	player.wins++
+	updateStatsFromWin(player, rating)
 	delete player.name // Remove id as we cannot change that(would result in an error from ddb)
 	return db.updatePlayer(key, player)
 }
