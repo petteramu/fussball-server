@@ -7,15 +7,11 @@ const DEFAULT_KFACTOR = process.env.kfactor || 32
 // Calculates a game and the resulting change in rating for the given set of players
 // @param [Object]
 // @return [Object]
-async function calculateGame (game) {
+async function calculateGame (game, existingGame) {
 	await _validateGame(game)
 
-	let whiteRating, blackRating, existingGame;
-	if(game.id !== undefined) {
-		existingGame = await db.getGame(game.id)
-		if(existingGame === undefined) {
-			throw new Error(`No game with id ${game.id} found. Cannot re-calculate game.`)
-		}
+	let whiteRating, blackRating;
+	if(existingGame !== undefined && existingGame !== null) {
 		whiteRating = existingGame.white.preRanking
 		blackRating = existingGame.black.preRanking
 	}
@@ -111,7 +107,6 @@ function getNewRating (currentRating, result, probability) {
 // Makes sure it contains the correct properties
 // @param [Object] data
 async function _validateGame (data) {
-	console.log('_validateGame', data, !_.isString(data.white), !_.isString(data.black))
 	if (!data || !_.isString(data.white) || !_.isString(data.black)) {
 		throw new Error("Missing player data in game object")
 	}
