@@ -167,6 +167,18 @@ functions:
             parameters:
               paths:
                 id: true
+  recalculateGames:
+    handler: src/actions/recalculateGames.handler
+    memorySize: 128
+    description: Recalculates all games and updates the player rankings
+    environment:
+      GAMES_TABLE: ${self:custom.GAMES_TABLE}
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+    events:
+      - http:
+          path: recalculate
+          method: get
+          cors: true
 
 resources:
   Resources:
