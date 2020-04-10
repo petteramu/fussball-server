@@ -197,7 +197,7 @@ class DynamoDBProvider {
         if (deleteObject && deleteObject.ExpressionAttributeValues)
             params.ExpressionAttributeValues = deleteObject.ExpressionAttributeValues
 
-        this.docClient.delete(params).promise()
+        return this.docClient.delete(params).promise()
     }
     
     // Queries a Database table for Items matching the given query conditions

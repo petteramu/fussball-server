@@ -12,8 +12,8 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs8.10
   stage: dev
+  runtime: nodejs12.x
   region: eu-central-1
   tags:
     service: Nf6Chill
@@ -150,6 +150,17 @@ functions:
       - http:
           path: tournaments
           method: get
+          cors: true
+  removeDuplicateGames:
+    handler: src/actions/removeDuplicateGames.handler
+    memorySize: 128
+    description: Removes one of all duplicate games
+    environment:
+      GAMES_TABLE: ${self:custom.GAMES_TABLE}
+    events:
+      - http:
+          path: removeDuplicateGames
+          method: post
           cors: true
   deleteGame:
     handler: src/actions/deleteGame.handler
