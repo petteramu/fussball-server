@@ -42,7 +42,7 @@ function calculateStandings(tournament) {
         }).length
         let losses = matches.filter((match) => {
             let playerColor = (match.white.key === player) ? 'white' : 'black'
-            return match.winner !== playerColor && match.winner !== 'remis'
+            return match.winner !== playerColor && match.winner !== 'remis' && match.winner
         }).length
         let remis = matches.filter(match => match.winner === 'remis').length
         let points = (wins + remis / 2)
