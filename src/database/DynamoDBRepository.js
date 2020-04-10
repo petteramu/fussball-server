@@ -89,7 +89,11 @@ class DynamoDBRepository {
     }
 
     removeGame (id) {
+        if(!(typeof id === "string" && id)) {
+            throw new Error("DDBRepository.removeGame provided id must be defined and a non-empty-string, was: " + id)
+        }
 
+        return this.provider.deleteItem(GAMES_TABLE, { id })
     }
 
     addTournament (tournament) {
