@@ -151,6 +151,7 @@ functions:
           path: tournaments
           method: get
           cors: true
+<<<<<<< HEAD
   removeDuplicateGames:
     handler: src/actions/removeDuplicateGames.handler
     memorySize: 128
@@ -162,6 +163,24 @@ functions:
           path: removeDuplicateGames
           method: post
           cors: true
+=======
+  deleteGame:
+    handler: src/actions/deleteGame.handler
+    memorySize: 128
+    description: Removes a game from the server
+    environment:
+      GAMES_TABLE: ${self:custom.GAMES_TABLE}
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+    events:
+      - http:
+          path: game/{id}
+          method: delete
+          cors: true
+          request:
+            parameters:
+              paths:
+                id: true
+>>>>>>> 127937e76e96c8531b62238190d8d138b291b00b
 
 resources:
   Resources:

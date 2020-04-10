@@ -179,7 +179,7 @@ class DynamoDBProvider {
     // @param [Object] updateObject Should contain all DDB update expression rules as keys such as 
     // ConditionExpression, ExpressionAttributeValues, etc. These will be used directly
     // @return Promise
-    deleteItem (tableName, keys, updateObject) {
+    deleteItem (tableName, keys, deleteObject) {
         if(typeof tableName !== 'string')
             return Promise.reject('First argument needs to be a string')
         
@@ -191,11 +191,11 @@ class DynamoDBProvider {
             Key: keys
         }
 
-        if (updateObject && updateObject.ConditionExpression)
-            params.ConditionExpression = updateObject.ConditionExpression
+        if (deleteObject && deleteObject.ConditionExpression)
+            params.ConditionExpression = deleteObject.ConditionExpression
         
-        if (updateObject && updateObject.ExpressionAttributeValues)
-            params.ExpressionAttributeValues = updateObject.ExpressionAttributeValues
+        if (deleteObject && deleteObject.ExpressionAttributeValues)
+            params.ExpressionAttributeValues = deleteObject.ExpressionAttributeValues
 
         return this.docClient.delete(params).promise()
     }
