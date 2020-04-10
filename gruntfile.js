@@ -37,17 +37,6 @@ module.exports = function(grunt) {
         ]
       }
     },
-    compress: {
-      main: {
-        options: {
-          archive: 'build.zip'
-        },
-        files: [
-          { expand: true, src: ['./**/*'], cwd: 'build/'},
-          { src: ['node_modules/**'], dest: '/' }
-        ]
-      }
-    },
     clean: {
       default: ['./build'],
       build: ['./build.zip']
@@ -58,12 +47,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-run');
 
   // Default task(s).
   grunt.registerTask('default', ['clean:default', 'copy', 'coffee', 'watch']);
-  grunt.registerTask('build', ['copy', 'coffee', 'clean:build', 'compress']);
+  grunt.registerTask('build', ['copy', 'coffee', 'clean:build']);
 
 };
