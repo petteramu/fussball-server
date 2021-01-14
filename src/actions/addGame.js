@@ -7,6 +7,7 @@ const {
 	updateStatsFromWin,
 	updateStatsFromLoss
 } = require('../utils/stats.js')
+const updateCache = require('../utils/updateCache')
 
 const handler = async function (e, context) {
 	console.log('EVENT: \n', JSON.stringify(e))
@@ -18,7 +19,9 @@ const handler = async function (e, context) {
 	else
 		var data = e
 
-	return await addGame(JSON.parse(data))
+	let result = await addGame(JSON.parse(data))
+	await updateCache(process.env.CACHE_BUCKET)
+	return result
 }
 
 // Calculate and add the game result to the database
@@ -33,9 +36,6 @@ async function addGame (game) {
 	let existingGame = null;
 	if(game.id !== undefined && game.id !== null) {
 		existingGame = await db.getGame(game.id)
-		if(existingGame === undefined) {
-			throw new Error(`No game with id ${game.id} found. Cannot re-calculate game.`)
-		}
 	}
 
 	let { newGame, newWhiteElo, newBlackElo } = await calculateGame(game, existingGame)

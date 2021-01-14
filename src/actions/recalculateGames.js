@@ -14,18 +14,13 @@ const handler = async function (e, context) {
 	if(context)
 		context.callbackWaitsForEmptyEventLoop = false
 
-	if (e && e.body)
-		var data = e.body
-	else
-		var data = e
-
-    var body = JSON.parse(data)
-
-    let games = db.getGames()
+    let games = await db.getGames()
     games = _.sortBy(games, 'timestamp')
-
+    console.log("Recalculating " + games.length + " games")
     try {
         const result = await recalculateGames(games)
+        console.log(result.games)
+        console.log(result.rankings)
         let promises = result.games.map(game => db.addGame(game))
         await Promise.all(promises)
         let userPromises = Object.entries(result.rankings).map(([key, value]) => db.updatePlayer(key, value))

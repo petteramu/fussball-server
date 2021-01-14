@@ -1,23 +1,33 @@
 service: Nf6Chill
-tenant: petteramu
 app: nf6-chill
 
 custom:
+  STAGE: dev
   GAMES_TABLE: "${self:service}_games_${self:provider.stage}"
   RANKINGS_TABLE: "${self:service}_rankings_${self:provider.stage}"
   TOURNAMENT_TABLE: "${self:service}_tournaments_${self:provider.stage}"
+  AUTH0_AUDIENCE: "${file(./auth0_credentials.yaml):AUTH0_AUDIENCE}"
+  AUTH0_TOKEN_ISSUER: "${file(./auth0_credentials.yaml):AUTH0_TOKEN_ISSUER}"
+  AUTH0_JWKS_URI: "${file(./auth0_credentials.yaml):AUTH0_JWKS_URI}"
+  BUCKET_NAME: "bogb-ranking-and-matches-${self:custom.STAGE}"
 
 plugins:
   - serverless-offline
 
 provider:
   name: aws
-  stage: dev
+  stage: ${self:custom.STAGE}
   runtime: nodejs12.x
   region: eu-central-1
   tags:
     service: Nf6Chill
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource:
+        - "arn:aws:s3:::${self:custom.BUCKET_NAME}/*"
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -49,6 +59,30 @@ provider:
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.TOURNAMENT_TABLE}"
 
 functions:
+  authAddGame:
+    handler: src/auth/auth.authAddGame
+    environment:
+      AUDIENCE: "${self:custom.AUTH0_AUDIENCE}"
+      TOKEN_ISSUER: "${self:custom.AUTH0_TOKEN_ISSUER}"
+      JWKS_URI: "${self:custom.AUTH0_JWKS_URI}"
+  authAddPlayer:
+    handler: src/auth/auth.authAddPlayer
+    environment:
+      AUDIENCE: "${self:custom.AUTH0_AUDIENCE}"
+      TOKEN_ISSUER: "${self:custom.AUTH0_TOKEN_ISSUER}"
+      JWKS_URI: "${self:custom.AUTH0_JWKS_URI}"
+  authAddTournament:
+    handler: src/auth/auth.authAddTournament
+    environment:
+      AUDIENCE: "${self:custom.AUTH0_AUDIENCE}"
+      TOKEN_ISSUER: "${self:custom.AUTH0_TOKEN_ISSUER}"
+      JWKS_URI: "${self:custom.AUTH0_JWKS_URI}"
+  authDeleteGame:
+    handler: src/auth/auth.authDeleteGame
+    environment:
+      AUDIENCE: "${self:custom.AUTH0_AUDIENCE}"
+      TOKEN_ISSUER: "${self:custom.AUTH0_TOKEN_ISSUER}"
+      JWKS_URI: "${self:custom.AUTH0_JWKS_URI}"
   addGame:
     handler: src/actions/addGame.handler
     memorySize: 128
@@ -56,9 +90,24 @@ functions:
     environment:
       GAMES_TABLE: ${self:custom.GAMES_TABLE}
       RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
     events:
       - http:
           path: game
+          method: post
+          cors: true
+          authorizer: authAddGame
+  updateCache:
+    handler: src/actions/updateCache.handler
+    memorySize: 128
+    description: Updates the s3 cache
+    environment:
+      GAMES_TABLE: ${self:custom.GAMES_TABLE}
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
+    events:
+      - http:
+          path: updateCache
           method: post
           cors: true
   addRawGame:
@@ -67,33 +116,39 @@ functions:
     description: Adds a raw game to the games table
     environment:
       GAMES_TABLE: ${self:custom.GAMES_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
     events:
       - http:
           path: rawgame
           method: post
           cors: true
+          authorizer: authAddGame
   addPlayer:
     handler: src/actions/addPlayer.handler
     memorySize: 128
     description: Adds a player to the rankings table
     environment:
       RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
     events:
       - http:
           path: player
           method: post
           cors: true
+          authorizer: authAddPlayer
   addRawPlayer:
     handler: src/actions/addRawPlayer.handler
     memorySize: 128
     description: Adds a raw player to the rankings table
     environment:
       RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
     events:
       - http:
           path: rawplayer
           method: post
           cors: true
+          authorizer: authAddPlayer
   getRankings:
     handler: src/actions/getRankings.handler
     memorySize: 128
@@ -111,6 +166,8 @@ functions:
     description: Lists games
     environment:
       GAMES_TABLE: ${self:custom.GAMES_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
+      RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
     events:
       - http:
           path: games
@@ -128,6 +185,7 @@ functions:
           path: tournament
           method: post
           cors: true
+          authorizer: authAddTournament
   getTournament:
     handler: src/actions/getTournament.handler
     memorySize: 128
@@ -157,11 +215,13 @@ functions:
     description: Removes one of all duplicate games
     environment:
       GAMES_TABLE: ${self:custom.GAMES_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
     events:
       - http:
           path: removeDuplicateGames
           method: post
           cors: true
+          authorizer: authDeleteGame
   deleteGame:
     handler: src/actions/deleteGame.handler
     memorySize: 128
@@ -169,11 +229,13 @@ functions:
     environment:
       GAMES_TABLE: ${self:custom.GAMES_TABLE}
       RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
     events:
       - http:
           path: game/{id}
           method: delete
           cors: true
+          authorizer: authDeleteGame
           request:
             parameters:
               paths:
@@ -185,14 +247,45 @@ functions:
     environment:
       GAMES_TABLE: ${self:custom.GAMES_TABLE}
       RANKINGS_TABLE: ${self:custom.RANKINGS_TABLE}
+      CACHE_BUCKET: "${self:custom.BUCKET_NAME}"
     events:
       - http:
           path: recalculate
           method: get
           cors: true
+          authorizer: authAddGame
 
 resources:
   Resources:
+    CacheBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: ${self:custom.BUCKET_NAME}
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+    BucketPolicy:
+      Type: 'AWS::S3::BucketPolicy'
+      Properties:
+        Bucket: ${self:custom.BUCKET_NAME}
+        PolicyDocument:
+          Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: Allow
+              Resource: "arn:aws:s3:::${self:custom.BUCKET_NAME}/*"
+              Principal: '*'
     GamesTable:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain

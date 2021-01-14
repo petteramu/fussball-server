@@ -5,9 +5,8 @@
       "name": "Nf6Chill"
     },
     "provider": {
-      "stage": "prod",
-      "variableSyntax": "\\${([^{}]+?)}",
       "name": "aws",
+      "stage": "dev",
       "runtime": "nodejs12.x",
       "region": "eu-central-1",
       "tags": {
@@ -17,27 +16,10 @@
         {
           "Effect": "Allow",
           "Action": [
-            "dynamodb:Query",
-            "dynamodb:Scan",
-            "dynamodb:GetItem",
-            "dynamodb:BatchGetItem",
-            "dynamodb:PutItem",
-            "dynamodb:UpdateItem",
-            "dynamodb:DeleteItem"
+            "s3:PutObject",
+            "s3:GetObject"
           ],
-          "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_games_prod"
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "dynamodb:Query",
-            "dynamodb:Scan",
-            "dynamodb:GetItem",
-            "dynamodb:PutItem",
-            "dynamodb:UpdateItem",
-            "dynamodb:DeleteItem"
-          ],
-          "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_rankings_prod"
+          "Resource": "arn:aws:s3:::bogb-ranking-and-matches-dev/*"
         },
         {
           "Effect": "Allow",
@@ -50,11 +32,36 @@
             "dynamodb:UpdateItem",
             "dynamodb:DeleteItem"
           ],
-          "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_tournaments_prod"
+          "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_games_dev"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:Query",
+            "dynamodb:Scan",
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem"
+          ],
+          "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_rankings_dev"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:Query",
+            "dynamodb:Scan",
+            "dynamodb:GetItem",
+            "dynamodb:BatchGetItem",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem"
+          ],
+          "Resource": "arn:aws:dynamodb:eu-central-1:*:table/Nf6Chill_tournaments_dev"
         }
       ],
+      "variableSyntax": "\\${([^{}:]+?(?:\\(|:)(?:[^:{}][^{}]*?)?)}",
       "versionFunctions": true,
-      "remoteFunctionData": null,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
         "Description": "The AWS CloudFormation template for this Serverless application",
@@ -101,6 +108,21 @@
                             "/*"
                           ]
                         ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
                       }
                     ],
                     "Condition": {
@@ -113,64 +135,106 @@
               }
             }
           },
+          "AuthAddGameLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-authAddGame"
+            }
+          },
+          "AuthAddPlayerLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-authAddPlayer"
+            }
+          },
+          "AuthAddTournamentLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-authAddTournament"
+            }
+          },
+          "AuthDeleteGameLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-authDeleteGame"
+            }
+          },
           "AddGameLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-addGame"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-addGame"
+            }
+          },
+          "UpdateCacheLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-updateCache"
             }
           },
           "AddRawGameLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-addRawGame"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-addRawGame"
             }
           },
           "AddPlayerLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-addPlayer"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-addPlayer"
             }
           },
           "AddRawPlayerLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-addRawPlayer"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-addRawPlayer"
             }
           },
           "GetRankingsLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-getRankings"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-getRankings"
             }
           },
           "GetGamesLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-getGames"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-getGames"
             }
           },
           "CreateTournamentLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-createTournament"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-createTournament"
             }
           },
           "GetTournamentLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-getTournament"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-getTournament"
             }
           },
           "GetTournamentsLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-getTournaments"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-getTournaments"
             }
           },
           "RemoveDuplicateGamesLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/Nf6Chill-prod-removeDuplicateGames"
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-removeDuplicateGames"
+            }
+          },
+          "DeleteGameLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-deleteGame"
+            }
+          },
+          "RecalculateGamesLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/Nf6Chill-dev-recalculateGames"
             }
           },
           "IamRoleLambdaExecution": {
@@ -198,7 +262,8 @@
                     "Fn::Join": [
                       "-",
                       [
-                        "Nf6Chill-prod",
+                        "Nf6Chill",
+                        "dev",
                         "lambda"
                       ]
                     ]
@@ -214,7 +279,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/Nf6Chill-prod*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/Nf6Chill-dev*:*"
                           }
                         ]
                       },
@@ -225,7 +290,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/Nf6Chill-prod*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/Nf6Chill-dev*:*:*"
                           }
                         ]
                       },
@@ -237,6 +302,9 @@
                       },
                       {
                         "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][2]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][3]"
                       }
                     ]
                   }
@@ -247,7 +315,8 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "Nf6Chill-prod",
+                    "Nf6Chill",
+                    "dev",
                     {
                       "Ref": "AWS::Region"
                     },
@@ -257,105 +326,157 @@
               }
             }
           },
-          "EnterpriseLogAccessIamRole": {
-            "Type": "AWS::IAM::Role",
+          "AuthAddGameLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
             "Properties": {
-              "AssumeRolePolicyDocument": {
-                "Version": "2012-10-17",
-                "Statement": [
-                  {
-                    "Effect": "Allow",
-                    "Principal": {
-                      "AWS": "arn:aws:iam::802587217904:root"
-                    },
-                    "Action": "sts:AssumeRole",
-                    "Condition": {
-                      "StringEquals": {
-                        "sts:ExternalId": "ServerlessEnterprise-nslsKjXX3GFMfjghVg"
-                      }
-                    }
-                  }
-                ]
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "Policies": [
+              "Handler": "src/auth/auth.authAddGame",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-authAddGame",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Tags": [
                 {
-                  "PolicyName": "LogFilterAccess",
-                  "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                      {
-                        "Effect": "Allow",
-                        "Action": [
-                          "logs:FilterLogEvents"
-                        ],
-                        "Resource": [
-                          {
-                            "Fn::GetAtt": [
-                              "AddGameLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "AddRawGameLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "AddPlayerLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "AddRawPlayerLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "GetRankingsLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "GetGamesLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "CreateTournamentLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "GetTournamentLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "GetTournamentsLogGroup",
-                              "Arn"
-                            ]
-                          },
-                          {
-                            "Fn::GetAtt": [
-                              "RemoveDuplicateGamesLogGroup",
-                              "Arn"
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
+                  "Key": "service",
+                  "Value": "Nf6Chill"
                 }
-              ]
-            }
+              ],
+              "Environment": {
+                "Variables": {
+                  "AUDIENCE": "https://api.petteramu.com/sjakk",
+                  "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+                  "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AuthAddGameLogGroup"
+            ]
+          },
+          "AuthAddPlayerLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
+              },
+              "Handler": "src/auth/auth.authAddPlayer",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-authAddPlayer",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "AUDIENCE": "https://api.petteramu.com/sjakk",
+                  "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+                  "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AuthAddPlayerLogGroup"
+            ]
+          },
+          "AuthAddTournamentLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
+              },
+              "Handler": "src/auth/auth.authAddTournament",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-authAddTournament",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "AUDIENCE": "https://api.petteramu.com/sjakk",
+                  "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+                  "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AuthAddTournamentLogGroup"
+            ]
+          },
+          "AuthDeleteGameLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
+              },
+              "Handler": "src/auth/auth.authDeleteGame",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-authDeleteGame",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "AUDIENCE": "https://api.petteramu.com/sjakk",
+                  "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+                  "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AuthDeleteGameLogGroup"
+            ]
           },
           "AddGameLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -364,18 +485,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-addGame",
-              "Handler": "s_addGame.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/addGame.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-addGame",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Adds a game to the games table",
               "Tags": [
@@ -386,26 +501,60 @@
               ],
               "Environment": {
                 "Variables": {
-                  "GAMES_TABLE": "Nf6Chill_games_prod",
-                  "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "AddGameLogGroup",
-              "IamRoleLambdaExecution"
+              "AddGameLogGroup"
             ]
           },
-          "AddGameLambdaVersionzceXJm1pOAf7Zv9aMUqhFZZaev005siXTdFxHOgR8w": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
+          "UpdateCacheLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
             "Properties": {
-              "FunctionName": {
-                "Ref": "AddGameLambdaFunction"
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Adds a game to the games table"
-            }
+              "Handler": "src/actions/updateCache.handler",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-updateCache",
+              "MemorySize": 128,
+              "Timeout": 6,
+              "Description": "Updates the s3 cache",
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "UpdateCacheLogGroup"
+            ]
           },
           "AddRawGameLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -414,18 +563,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-addRawGame",
-              "Handler": "s_addRawGame.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/addRawGame.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-addRawGame",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Adds a raw game to the games table",
               "Tags": [
@@ -436,25 +579,20 @@
               ],
               "Environment": {
                 "Variables": {
-                  "GAMES_TABLE": "Nf6Chill_games_prod"
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "AddRawGameLogGroup",
-              "IamRoleLambdaExecution"
+              "AddRawGameLogGroup"
             ]
-          },
-          "AddRawGameLambdaVersionUmtD9wxGY2shX46rdQjs7cXhUsM1O5fRrAESTUjSOmI": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "AddRawGameLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Adds a raw game to the games table"
-            }
           },
           "AddPlayerLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -463,18 +601,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-addPlayer",
-              "Handler": "s_addPlayer.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/addPlayer.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-addPlayer",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Adds a player to the rankings table",
               "Tags": [
@@ -485,25 +617,20 @@
               ],
               "Environment": {
                 "Variables": {
-                  "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "AddPlayerLogGroup",
-              "IamRoleLambdaExecution"
+              "AddPlayerLogGroup"
             ]
-          },
-          "AddPlayerLambdaVersionU7NqojWaGRLB63y1quyubHBgwPrHm93HCO5SwNmy4": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "AddPlayerLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Adds a player to the rankings table"
-            }
           },
           "AddRawPlayerLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -512,18 +639,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-addRawPlayer",
-              "Handler": "s_addRawPlayer.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/addRawPlayer.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-addRawPlayer",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Adds a raw player to the rankings table",
               "Tags": [
@@ -534,25 +655,20 @@
               ],
               "Environment": {
                 "Variables": {
-                  "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "AddRawPlayerLogGroup",
-              "IamRoleLambdaExecution"
+              "AddRawPlayerLogGroup"
             ]
-          },
-          "AddRawPlayerLambdaVersionsUawrtwULbNFigzBx6fn0quPNOsPqQAzZ0raS98": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "AddRawPlayerLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Adds a raw player to the rankings table"
-            }
           },
           "GetRankingsLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -561,18 +677,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-getRankings",
-              "Handler": "s_getRankings.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/getRankings.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-getRankings",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Lists the rankings",
               "Tags": [
@@ -583,25 +693,19 @@
               ],
               "Environment": {
                 "Variables": {
-                  "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "GetRankingsLogGroup",
-              "IamRoleLambdaExecution"
+              "GetRankingsLogGroup"
             ]
-          },
-          "GetRankingsLambdaVersion5sGKDVvjQk4NWY5c2rqhlapnF7PibFalDiQZ6TQig": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetRankingsLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Lists the rankings"
-            }
           },
           "GetGamesLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -610,18 +714,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-getGames",
-              "Handler": "s_getGames.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/getGames.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-getGames",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Lists games",
               "Tags": [
@@ -632,25 +730,21 @@
               ],
               "Environment": {
                 "Variables": {
-                  "GAMES_TABLE": "Nf6Chill_games_prod"
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev",
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "GetGamesLogGroup",
-              "IamRoleLambdaExecution"
+              "GetGamesLogGroup"
             ]
-          },
-          "GetGamesLambdaVersionmziqpHgdH7cpIUj4xfRjTXZcheGxKypg80KllVFUnL8": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetGamesLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Lists games"
-            }
           },
           "CreateTournamentLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -659,18 +753,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-createTournament",
-              "Handler": "s_createTournament.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/createTournament.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-createTournament",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Creates a new tournament",
               "Tags": [
@@ -681,26 +769,20 @@
               ],
               "Environment": {
                 "Variables": {
-                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_prod",
-                  "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev",
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "CreateTournamentLogGroup",
-              "IamRoleLambdaExecution"
+              "CreateTournamentLogGroup"
             ]
-          },
-          "CreateTournamentLambdaVersionCUh56tm57rYP7ZJOCTQjIF8RTaobhnh14dcjwtjiU": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "CreateTournamentLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Creates a new tournament"
-            }
           },
           "GetTournamentLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -709,18 +791,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-getTournament",
-              "Handler": "s_getTournament.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/getTournament.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-getTournament",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Returns a specific tournament",
               "Tags": [
@@ -731,26 +807,20 @@
               ],
               "Environment": {
                 "Variables": {
-                  "GAMES_TABLE": "Nf6Chill_games_prod",
-                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_prod"
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "GetTournamentLogGroup",
-              "IamRoleLambdaExecution"
+              "GetTournamentLogGroup"
             ]
-          },
-          "GetTournamentLambdaVersion9yh9nRBv5E1u0sO3QhFgh0h0N8CxGCCeFNi7zNvErQ": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetTournamentLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Returns a specific tournament"
-            }
           },
           "GetTournamentsLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -759,18 +829,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-getTournaments",
-              "Handler": "s_getTournaments.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/getTournaments.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-getTournaments",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Returns all tournaments",
               "Tags": [
@@ -781,25 +845,19 @@
               ],
               "Environment": {
                 "Variables": {
-                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_prod"
+                  "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "GetTournamentsLogGroup",
-              "IamRoleLambdaExecution"
+              "GetTournamentsLogGroup"
             ]
-          },
-          "GetTournamentsLambdaVersion1Tjg3VFNutevDxzzXXGciWNCkXySROe0MHJZRq8PHfA": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetTournamentsLambdaFunction"
-              },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
-              "Description": "Returns all tournaments"
-            }
           },
           "RemoveDuplicateGamesLambdaFunction": {
             "Type": "AWS::Lambda::Function",
@@ -808,18 +866,12 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/Nf6Chill.zip"
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
               },
-              "FunctionName": "Nf6Chill-prod-removeDuplicateGames",
-              "Handler": "s_removeDuplicateGames.handler",
-              "MemorySize": 128,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
+              "Handler": "src/actions/removeDuplicateGames.handler",
               "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-removeDuplicateGames",
+              "MemorySize": 128,
               "Timeout": 6,
               "Description": "Removes one of all duplicate games",
               "Tags": [
@@ -830,30 +882,286 @@
               ],
               "Environment": {
                 "Variables": {
-                  "GAMES_TABLE": "Nf6Chill_games_prod"
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
                 }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
               }
             },
             "DependsOn": [
-              "RemoveDuplicateGamesLogGroup",
-              "IamRoleLambdaExecution"
+              "RemoveDuplicateGamesLogGroup"
             ]
           },
-          "RemoveDuplicateGamesLambdaVersionQSNFZGLhhFVgqTTy6XxzTDWMdcBi3gVgIo76p6e7Y": {
+          "DeleteGameLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
+              },
+              "Handler": "src/actions/deleteGame.handler",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-deleteGame",
+              "MemorySize": 128,
+              "Timeout": 6,
+              "Description": "Removes a game from the server",
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "DeleteGameLogGroup"
+            ]
+          },
+          "RecalculateGamesLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z/Nf6Chill.zip"
+              },
+              "Handler": "src/actions/recalculateGames.handler",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "Nf6Chill-dev-recalculateGames",
+              "MemorySize": 128,
+              "Timeout": 6,
+              "Description": "Recalculates all games and updates the player rankings",
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "Nf6Chill"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "GAMES_TABLE": "Nf6Chill_games_dev",
+                  "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+                  "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "RecalculateGamesLogGroup"
+            ]
+          },
+          "AuthAddPlayerLambdaVersionX85W0dTUi6qJoHgOxiBN4UC1KLEuLjibYIlWL6EbgY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AuthAddPlayerLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI="
+            }
+          },
+          "AuthAddTournamentLambdaVersion7w91zJQ9FU05eWj4Oq8kkOFQIHIQ4uWw3izj2loRqs": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AuthAddTournamentLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI="
+            }
+          },
+          "AuthDeleteGameLambdaVersionqjcEeJSp0vd3k90oheLq1p6u6bj8mZ7b3apR4rRDmRU": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AuthDeleteGameLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI="
+            }
+          },
+          "AddGameLambdaVersionXyRl1DdXJbODZ6SQrwWxCzKpUlr743fRlOa54svVCM": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AddGameLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Adds a game to the games table"
+            }
+          },
+          "AddRawGameLambdaVersionvkFDVeRn1d8oy4DZjlGKwhlK0HHzu6zaUZ3ffGmzg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AddRawGameLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Adds a raw game to the games table"
+            }
+          },
+          "UpdateCacheLambdaVersionhgFBsMPxwTslPaFAvP1Jg3DgNU00XBzuHTIwC9dIkhU": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "UpdateCacheLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Updates the s3 cache"
+            }
+          },
+          "AddPlayerLambdaVersiond8h4gxKTSVVsleIFXid4giCims3lY7bwG52WBqVvo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AddPlayerLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Adds a player to the rankings table"
+            }
+          },
+          "AddRawPlayerLambdaVersioniFxBOiKdNlr1hEC1x3liv4asvD47ukC5MQldY98UkJg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AddRawPlayerLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Adds a raw player to the rankings table"
+            }
+          },
+          "GetRankingsLambdaVersionhnUg3MvMN2D8IRbq6pjYLaqjzRkWiErOb42y00ny3E": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetRankingsLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Lists the rankings"
+            }
+          },
+          "GetGamesLambdaVersion5qNWTByfTT7sKpCH458P2IrN6ydU9XvH6rjmiqnq0": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetGamesLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Lists games"
+            }
+          },
+          "GetTournamentLambdaVersionlsQaBgCvvb5vmT0saboZWzyKCn8BDZzI1hYwihJLfCk": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetTournamentLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Returns a specific tournament"
+            }
+          },
+          "CreateTournamentLambdaVersionGFizG5BccSet5X5N6snvF9RRjmfikMPfaGR2c1LIYw": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateTournamentLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Creates a new tournament"
+            }
+          },
+          "GetTournamentsLambdaVersionpdp2rQdbCi4yTdB7KufkSjv7LWCDVeclvI0dIkVQA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetTournamentsLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Returns all tournaments"
+            }
+          },
+          "RemoveDuplicateGamesLambdaVersionHMi6zD3zrajBwujpiGSavL9nVKQH8iYmU48V0iPfqSI": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "RemoveDuplicateGamesLambdaFunction"
               },
-              "CodeSha256": "+EJEha8RStC62SStpyZQhFl3IFYV1xyKeRkO33pQag8=",
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
               "Description": "Removes one of all duplicate games"
+            }
+          },
+          "DeleteGameLambdaVersion0zdTWGRMXiGquRbdGHWTtoGX4TlW5d2shKH29wHQ": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "DeleteGameLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Removes a game from the server"
+            }
+          },
+          "RecalculateGamesLambdaVersionm0cCJXqcTk0oT7O5OVQJpCnjwS3T3U4IUuTfLBviw2M": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "RecalculateGamesLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI=",
+              "Description": "Recalculates all games and updates the player rankings"
+            }
+          },
+          "AuthAddGameLambdaVersionzBa8nVx7tp7B7WgjrR0byzcS7pwk4MIVSANTitYeD4": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AuthAddGameLambdaFunction"
+              },
+              "CodeSha256": "K/Wzk7gUhiu1wpct2lgbNBvsGeJeVEw5KCOdVoL5cyI="
             }
           },
           "ApiGatewayRestApi": {
             "Type": "AWS::ApiGateway::RestApi",
             "Properties": {
-              "Name": "prod-Nf6Chill",
+              "Name": "dev-Nf6Chill",
               "EndpointConfiguration": {
                 "Types": [
                   "EDGE"
@@ -872,6 +1180,33 @@
                 ]
               },
               "PathPart": "game",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceGameIdVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceGame"
+              },
+              "PathPart": "{id}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceUpdatecache": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "updateCache",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -997,6 +1332,21 @@
               }
             }
           },
+          "ApiGatewayResourceRecalculate": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "recalculate",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
           "ApiGatewayMethodGameOptions": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
@@ -1029,13 +1379,58 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
               },
               "ResourceId": {
                 "Ref": "ApiGatewayResourceGame"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodUpdatecacheOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceUpdatecache"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -1074,7 +1469,7 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -1119,7 +1514,7 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -1164,7 +1559,7 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -1209,7 +1604,7 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -1254,7 +1649,7 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -1299,7 +1694,7 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -1344,7 +1739,7 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -1389,13 +1784,103 @@
                       "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
               },
               "ResourceId": {
                 "Ref": "ApiGatewayResourceRemoveduplicategames"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodGameIdVarOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,DELETE'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceGameIdVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodRecalculateOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceRecalculate"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -1414,7 +1899,10 @@
                 "Ref": "ApiGatewayRestApi"
               },
               "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthAddGameApiGatewayAuthorizer"
+              },
               "Integration": {
                 "IntegrationHttpMethod": "POST",
                 "Type": "AWS_PROXY",
@@ -1443,6 +1931,50 @@
                 }
               },
               "MethodResponses": []
+            },
+            "DependsOn": "AuthAddGameApiGatewayAuthorizer"
+          },
+          "ApiGatewayMethodUpdatecachePost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceUpdatecache"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "UpdateCacheLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
             }
           },
           "ApiGatewayMethodRawgamePost": {
@@ -1457,7 +1989,10 @@
                 "Ref": "ApiGatewayRestApi"
               },
               "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthAddGameApiGatewayAuthorizer"
+              },
               "Integration": {
                 "IntegrationHttpMethod": "POST",
                 "Type": "AWS_PROXY",
@@ -1486,7 +2021,8 @@
                 }
               },
               "MethodResponses": []
-            }
+            },
+            "DependsOn": "AuthAddGameApiGatewayAuthorizer"
           },
           "ApiGatewayMethodPlayerPost": {
             "Type": "AWS::ApiGateway::Method",
@@ -1500,7 +2036,10 @@
                 "Ref": "ApiGatewayRestApi"
               },
               "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthAddPlayerApiGatewayAuthorizer"
+              },
               "Integration": {
                 "IntegrationHttpMethod": "POST",
                 "Type": "AWS_PROXY",
@@ -1529,7 +2068,8 @@
                 }
               },
               "MethodResponses": []
-            }
+            },
+            "DependsOn": "AuthAddPlayerApiGatewayAuthorizer"
           },
           "ApiGatewayMethodRawplayerPost": {
             "Type": "AWS::ApiGateway::Method",
@@ -1543,7 +2083,10 @@
                 "Ref": "ApiGatewayRestApi"
               },
               "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthAddPlayerApiGatewayAuthorizer"
+              },
               "Integration": {
                 "IntegrationHttpMethod": "POST",
                 "Type": "AWS_PROXY",
@@ -1572,7 +2115,8 @@
                 }
               },
               "MethodResponses": []
-            }
+            },
+            "DependsOn": "AuthAddPlayerApiGatewayAuthorizer"
           },
           "ApiGatewayMethodRankingsGet": {
             "Type": "AWS::ApiGateway::Method",
@@ -1672,7 +2216,10 @@
                 "Ref": "ApiGatewayRestApi"
               },
               "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthAddTournamentApiGatewayAuthorizer"
+              },
               "Integration": {
                 "IntegrationHttpMethod": "POST",
                 "Type": "AWS_PROXY",
@@ -1701,7 +2248,8 @@
                 }
               },
               "MethodResponses": []
-            }
+            },
+            "DependsOn": "AuthAddTournamentApiGatewayAuthorizer"
           },
           "ApiGatewayMethodTournamentGet": {
             "Type": "AWS::ApiGateway::Method",
@@ -1801,7 +2349,10 @@
                 "Ref": "ApiGatewayRestApi"
               },
               "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthDeleteGameApiGatewayAuthorizer"
+              },
               "Integration": {
                 "IntegrationHttpMethod": "POST",
                 "Type": "AWS_PROXY",
@@ -1830,18 +2381,252 @@
                 }
               },
               "MethodResponses": []
+            },
+            "DependsOn": "AuthDeleteGameApiGatewayAuthorizer"
+          },
+          "ApiGatewayMethodGameIdVarDelete": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "DELETE",
+              "RequestParameters": {
+                "method.request.path.id": true
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceGameIdVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthDeleteGameApiGatewayAuthorizer"
+              },
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "DeleteGameLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": "AuthDeleteGameApiGatewayAuthorizer"
+          },
+          "ApiGatewayMethodRecalculateGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceRecalculate"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "CUSTOM",
+              "AuthorizerId": {
+                "Ref": "AuthAddGameApiGatewayAuthorizer"
+              },
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "RecalculateGamesLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": "AuthAddGameApiGatewayAuthorizer"
+          },
+          "AuthAddGameApiGatewayAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+              "IdentitySource": "method.request.header.Authorization",
+              "Name": "authAddGame",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "AuthorizerUri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "AuthAddGameLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              },
+              "Type": "TOKEN"
             }
           },
-          "ApiGatewayDeployment1585067623419": {
+          "AuthAddPlayerApiGatewayAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+              "IdentitySource": "method.request.header.Authorization",
+              "Name": "authAddPlayer",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "AuthorizerUri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "AuthAddPlayerLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              },
+              "Type": "TOKEN"
+            }
+          },
+          "AuthAddTournamentApiGatewayAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+              "IdentitySource": "method.request.header.Authorization",
+              "Name": "authAddTournament",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "AuthorizerUri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "AuthAddTournamentLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              },
+              "Type": "TOKEN"
+            }
+          },
+          "AuthDeleteGameApiGatewayAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+              "IdentitySource": "method.request.header.Authorization",
+              "Name": "authDeleteGame",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "AuthorizerUri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "AuthDeleteGameLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              },
+              "Type": "TOKEN"
+            }
+          },
+          "ApiGatewayDeployment1610571567597": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               },
-              "StageName": "prod"
+              "StageName": "dev"
             },
             "DependsOn": [
               "ApiGatewayMethodGameOptions",
+              "ApiGatewayMethodUpdatecacheOptions",
               "ApiGatewayMethodRawgameOptions",
               "ApiGatewayMethodPlayerOptions",
               "ApiGatewayMethodRawplayerOptions",
@@ -1850,7 +2635,10 @@
               "ApiGatewayMethodTournamentOptions",
               "ApiGatewayMethodTournamentsOptions",
               "ApiGatewayMethodRemoveduplicategamesOptions",
+              "ApiGatewayMethodGameIdVarOptions",
+              "ApiGatewayMethodRecalculateOptions",
               "ApiGatewayMethodGamePost",
+              "ApiGatewayMethodUpdatecachePost",
               "ApiGatewayMethodRawgamePost",
               "ApiGatewayMethodPlayerPost",
               "ApiGatewayMethodRawplayerPost",
@@ -1859,7 +2647,9 @@
               "ApiGatewayMethodTournamentPost",
               "ApiGatewayMethodTournamentGet",
               "ApiGatewayMethodTournamentsGet",
-              "ApiGatewayMethodRemoveduplicategamesPost"
+              "ApiGatewayMethodRemoveduplicategamesPost",
+              "ApiGatewayMethodGameIdVarDelete",
+              "ApiGatewayMethodRecalculateGet"
             ]
           },
           "AddGameLambdaPermissionApiGateway": {
@@ -1868,6 +2658,80 @@
               "FunctionName": {
                 "Fn::GetAtt": [
                   "AddGameLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "AuthAddGameLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "AuthAddGameLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "UpdateCacheLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "UpdateCacheLambdaFunction",
                   "Arn"
                 ]
               },
@@ -1942,6 +2806,43 @@
               "FunctionName": {
                 "Fn::GetAtt": [
                   "AddPlayerLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "AuthAddPlayerLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "AuthAddPlayerLambdaFunction",
                   "Arn"
                 ]
               },
@@ -2121,6 +3022,43 @@
               }
             }
           },
+          "AuthAddTournamentLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "AuthAddTournamentLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
           "GetTournamentLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
@@ -2232,138 +3170,166 @@
               }
             }
           },
-          "ApiGatewayLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
+          "AuthDeleteGameLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
             "Properties": {
-              "LogGroupName": "/aws/api-gateway/Nf6Chill-prod"
-            }
-          },
-          "CustomApiGatewayAccountCloudWatchRole": {
-            "Type": "Custom::ApiGatewayAccountRole",
-            "Version": 1,
-            "Properties": {
-              "ServiceToken": {
+              "FunctionName": {
                 "Fn::GetAtt": [
-                  "CustomDashresourceDashapigwDashcwDashroleLambdaFunction",
+                  "AuthDeleteGameLambdaFunction",
                   "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
                 ]
               }
             }
           },
-          "IamRoleCustomResourcesLambdaExecution": {
-            "Type": "AWS::IAM::Role",
+          "DeleteGameLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
             "Properties": {
-              "AssumeRolePolicyDocument": {
-                "Version": "2012-10-17",
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "DeleteGameLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "RecalculateGamesLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "RecalculateGamesLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "CacheBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "bogb-ranking-and-matches-dev",
+              "CorsConfiguration": {
+                "CorsRules": [
+                  {
+                    "AllowedOrigins": [
+                      "*"
+                    ],
+                    "AllowedHeaders": [
+                      "*"
+                    ],
+                    "AllowedMethods": [
+                      "GET",
+                      "PUT",
+                      "POST",
+                      "DELETE",
+                      "HEAD"
+                    ],
+                    "MaxAge": 3000
+                  }
+                ]
+              }
+            }
+          },
+          "BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": "bogb-ranking-and-matches-dev",
+              "PolicyDocument": {
                 "Statement": [
                   {
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": [
-                        "lambda.amazonaws.com"
-                      ]
-                    },
                     "Action": [
-                      "sts:AssumeRole"
-                    ]
+                      "s3:GetObject"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "arn:aws:s3:::bogb-ranking-and-matches-dev/*",
+                    "Principal": "*"
                   }
-                ]
-              },
-              "Policies": [
-                {
-                  "PolicyName": {
-                    "Fn::Join": [
-                      "-",
-                      [
-                        "prod",
-                        "Nf6Chill",
-                        "custom-resources-lambda"
-                      ]
-                    ]
-                  },
-                  "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                      {
-                        "Effect": "Allow",
-                        "Resource": {
-                          "Fn::Join": [
-                            ":",
-                            [
-                              "arn",
-                              {
-                                "Ref": "AWS::Partition"
-                              },
-                              "iam:",
-                              {
-                                "Ref": "AWS::AccountId"
-                              },
-                              "role/*"
-                            ]
-                          ]
-                        },
-                        "Action": [
-                          "iam:AttachRolePolicy",
-                          "iam:CreateRole",
-                          "iam:ListAttachedRolePolicies",
-                          "iam:PassRole"
-                        ]
-                      },
-                      {
-                        "Effect": "Allow",
-                        "Resource": {
-                          "Fn::Join": [
-                            ":",
-                            [
-                              "arn",
-                              {
-                                "Ref": "AWS::Partition"
-                              },
-                              "apigateway:*::/account"
-                            ]
-                          ]
-                        },
-                        "Action": [
-                          "apigateway:GET",
-                          "apigateway:PATCH"
-                        ]
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          },
-          "CustomDashresourceDashapigwDashcwDashroleLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z/custom-resources.zip"
-              },
-              "FunctionName": "Nf6Chill-prod-custom-resource-apigw-cw-role",
-              "Handler": "apiGatewayCloudWatchRole/handler.handler",
-              "MemorySize": 1024,
-              "Runtime": "nodejs12.x",
-              "Timeout": 180,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleCustomResourcesLambdaExecution",
-                  "Arn"
                 ]
               }
-            },
-            "DependsOn": [
-              "IamRoleCustomResourcesLambdaExecution"
-            ]
+            }
           },
           "GamesTable": {
             "Type": "AWS::DynamoDB::Table",
             "DeletionPolicy": "Retain",
             "Properties": {
-              "TableName": "Nf6Chill_games_prod",
+              "TableName": "Nf6Chill_games_dev",
               "AttributeDefinitions": [
                 {
                   "AttributeName": "id",
@@ -2386,7 +3352,7 @@
             "Type": "AWS::DynamoDB::Table",
             "DeletionPolicy": "Retain",
             "Properties": {
-              "TableName": "Nf6Chill_rankings_prod",
+              "TableName": "Nf6Chill_rankings_dev",
               "AttributeDefinitions": [
                 {
                   "AttributeName": "name",
@@ -2409,7 +3375,7 @@
             "Type": "AWS::DynamoDB::Table",
             "DeletionPolicy": "Retain",
             "Properties": {
-              "TableName": "Nf6Chill_tournaments_prod",
+              "TableName": "Nf6Chill_tournaments_dev",
               "AttributeDefinitions": [
                 {
                   "AttributeName": "id",
@@ -2427,116 +3393,6 @@
                 "WriteCapacityUnits": 1
               }
             }
-          },
-          "CloudWatchLogsSubscriptionFilterAddGameLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "AddGameLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterAddRawGameLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "AddRawGameLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterAddPlayerLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "AddPlayerLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterAddRawPlayerLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "AddRawPlayerLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterGetRankingsLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "GetRankingsLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterGetGamesLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "GetGamesLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterCreateTournamentLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "CreateTournamentLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterGetTournamentLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "GetTournamentLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterGetTournamentsLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "GetTournamentsLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterRemoveDuplicateGamesLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "?\"REPORT RequestId: \" ?\"SERVERLESS_ENTERPRISE\"",
-              "LogGroupName": {
-                "Ref": "RemoveDuplicateGamesLogGroup"
-              }
-            }
-          },
-          "CloudWatchLogsSubscriptionFilterApiGatewayLogGroup": {
-            "Type": "AWS::Logs::SubscriptionFilter",
-            "Properties": {
-              "DestinationArn": "arn:aws:logs:eu-central-1:802587217904:destination:nslsKjXX3GFMfjghVg#fvKNcH3rS7Crl7VbtN#Nf6Chill#prod",
-              "FilterPattern": "\"SLS_ACCESS_LOG\"",
-              "LogGroupName": {
-                "Ref": "ApiGatewayLogGroup"
-              }
-            }
           }
         },
         "Outputs": {
@@ -2545,72 +3401,106 @@
               "Ref": "ServerlessDeploymentBucket"
             }
           },
-          "EnterpriseLogAccessIamRole": {
+          "AuthAddPlayerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
             "Value": {
-              "Fn::GetAtt": [
-                "EnterpriseLogAccessIamRole",
-                "Arn"
-              ]
+              "Ref": "AuthAddPlayerLambdaVersionX85W0dTUi6qJoHgOxiBN4UC1KLEuLjibYIlWL6EbgY"
+            }
+          },
+          "AuthAddTournamentLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "AuthAddTournamentLambdaVersion7w91zJQ9FU05eWj4Oq8kkOFQIHIQ4uWw3izj2loRqs"
+            }
+          },
+          "AuthDeleteGameLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "AuthDeleteGameLambdaVersionqjcEeJSp0vd3k90oheLq1p6u6bj8mZ7b3apR4rRDmRU"
             }
           },
           "AddGameLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddGameLambdaVersionzceXJm1pOAf7Zv9aMUqhFZZaev005siXTdFxHOgR8w"
+              "Ref": "AddGameLambdaVersionXyRl1DdXJbODZ6SQrwWxCzKpUlr743fRlOa54svVCM"
             }
           },
           "AddRawGameLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddRawGameLambdaVersionUmtD9wxGY2shX46rdQjs7cXhUsM1O5fRrAESTUjSOmI"
+              "Ref": "AddRawGameLambdaVersionvkFDVeRn1d8oy4DZjlGKwhlK0HHzu6zaUZ3ffGmzg"
+            }
+          },
+          "UpdateCacheLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "UpdateCacheLambdaVersionhgFBsMPxwTslPaFAvP1Jg3DgNU00XBzuHTIwC9dIkhU"
             }
           },
           "AddPlayerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddPlayerLambdaVersionU7NqojWaGRLB63y1quyubHBgwPrHm93HCO5SwNmy4"
+              "Ref": "AddPlayerLambdaVersiond8h4gxKTSVVsleIFXid4giCims3lY7bwG52WBqVvo"
             }
           },
           "AddRawPlayerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddRawPlayerLambdaVersionsUawrtwULbNFigzBx6fn0quPNOsPqQAzZ0raS98"
+              "Ref": "AddRawPlayerLambdaVersioniFxBOiKdNlr1hEC1x3liv4asvD47ukC5MQldY98UkJg"
             }
           },
           "GetRankingsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetRankingsLambdaVersion5sGKDVvjQk4NWY5c2rqhlapnF7PibFalDiQZ6TQig"
+              "Ref": "GetRankingsLambdaVersionhnUg3MvMN2D8IRbq6pjYLaqjzRkWiErOb42y00ny3E"
             }
           },
           "GetGamesLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetGamesLambdaVersionmziqpHgdH7cpIUj4xfRjTXZcheGxKypg80KllVFUnL8"
-            }
-          },
-          "CreateTournamentLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "CreateTournamentLambdaVersionCUh56tm57rYP7ZJOCTQjIF8RTaobhnh14dcjwtjiU"
+              "Ref": "GetGamesLambdaVersion5qNWTByfTT7sKpCH458P2IrN6ydU9XvH6rjmiqnq0"
             }
           },
           "GetTournamentLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetTournamentLambdaVersion9yh9nRBv5E1u0sO3QhFgh0h0N8CxGCCeFNi7zNvErQ"
+              "Ref": "GetTournamentLambdaVersionlsQaBgCvvb5vmT0saboZWzyKCn8BDZzI1hYwihJLfCk"
+            }
+          },
+          "CreateTournamentLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateTournamentLambdaVersionGFizG5BccSet5X5N6snvF9RRjmfikMPfaGR2c1LIYw"
             }
           },
           "GetTournamentsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetTournamentsLambdaVersion1Tjg3VFNutevDxzzXXGciWNCkXySROe0MHJZRq8PHfA"
+              "Ref": "GetTournamentsLambdaVersionpdp2rQdbCi4yTdB7KufkSjv7LWCDVeclvI0dIkVQA"
             }
           },
           "RemoveDuplicateGamesLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "RemoveDuplicateGamesLambdaVersionQSNFZGLhhFVgqTTy6XxzTDWMdcBi3gVgIo76p6e7Y"
+              "Ref": "RemoveDuplicateGamesLambdaVersionHMi6zD3zrajBwujpiGSavL9nVKQH8iYmU48V0iPfqSI"
+            }
+          },
+          "DeleteGameLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "DeleteGameLambdaVersion0zdTWGRMXiGquRbdGHWTtoGX4TlW5d2shKH29wHQ"
+            }
+          },
+          "RecalculateGamesLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "RecalculateGamesLambdaVersionm0cCJXqcTk0oT7O5OVQJpCnjwS3T3U4IUuTfLBviw2M"
+            }
+          },
+          "AuthAddGameLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "AuthAddGameLambdaVersionzBa8nVx7tp7B7WgjrR0byzcS7pwk4MIVSANTitYeD4"
             }
           },
           "ServiceEndpoint": {
@@ -2631,7 +3521,7 @@
                   {
                     "Ref": "AWS::URLSuffix"
                   },
-                  "/prod"
+                  "/dev"
                 ]
               ]
             }
@@ -2684,6 +3574,21 @@
                             "/*"
                           ]
                         ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
                       }
                     ],
                     "Condition": {
@@ -2705,30 +3610,95 @@
           }
         }
       },
-      "logs": {
-        "restApi": {
-          "format": "{\"requestTime\":\"$context.requestTime\",\"requestId\":\"$context.requestId\",\"apiId\":\"$context.apiId\",\"resourceId\":\"$context.resourceId\",\"resourcePath\":\"$context.resourcePath\",\"path\":\"$context.path\",\"httpMethod\":\"$context.httpMethod\",\"status\":\"$context.status\",\"authLatency\":\"$context.authorizer.integrationLatency\",\"integrationLatency\":\"$context.integrationLatency\",\"integrationStatus\":\"$context.integrationStatus\",\"responseLatency\":\"$context.responseLatency\",\"responseLength\":\"$context.responseLength\",\"errorMessage\":\"$context.error.message\",\"format\":\"SLS_ACCESS_LOG\",\"version\":\"1.0.0\"}"
-        }
-      },
       "vpc": {}
     },
     "custom": {
-      "GAMES_TABLE": "Nf6Chill_games_prod",
-      "RANKINGS_TABLE": "Nf6Chill_rankings_prod",
-      "TOURNAMENT_TABLE": "Nf6Chill_tournaments_prod"
+      "STAGE": "dev",
+      "GAMES_TABLE": "Nf6Chill_games_dev",
+      "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+      "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev",
+      "AUTH0_AUDIENCE": "https://api.petteramu.com/sjakk",
+      "AUTH0_TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+      "AUTH0_JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json",
+      "BUCKET_NAME": "bogb-ranking-and-matches-dev"
     },
     "plugins": [
       "serverless-offline"
     ],
     "pluginsData": {},
     "functions": {
+      "authAddGame": {
+        "handler": "src/auth/auth.authAddGame",
+        "environment": {
+          "AUDIENCE": "https://api.petteramu.com/sjakk",
+          "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+          "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+        },
+        "events": [],
+        "name": "Nf6Chill-dev-authAddGame",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "AuthAddGameLambdaVersionzBa8nVx7tp7B7WgjrR0byzcS7pwk4MIVSANTitYeD4"
+      },
+      "authAddPlayer": {
+        "handler": "src/auth/auth.authAddPlayer",
+        "environment": {
+          "AUDIENCE": "https://api.petteramu.com/sjakk",
+          "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+          "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+        },
+        "events": [],
+        "name": "Nf6Chill-dev-authAddPlayer",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "AuthAddPlayerLambdaVersionX85W0dTUi6qJoHgOxiBN4UC1KLEuLjibYIlWL6EbgY"
+      },
+      "authAddTournament": {
+        "handler": "src/auth/auth.authAddTournament",
+        "environment": {
+          "AUDIENCE": "https://api.petteramu.com/sjakk",
+          "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+          "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+        },
+        "events": [],
+        "name": "Nf6Chill-dev-authAddTournament",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "AuthAddTournamentLambdaVersion7w91zJQ9FU05eWj4Oq8kkOFQIHIQ4uWw3izj2loRqs"
+      },
+      "authDeleteGame": {
+        "handler": "src/auth/auth.authDeleteGame",
+        "environment": {
+          "AUDIENCE": "https://api.petteramu.com/sjakk",
+          "TOKEN_ISSUER": "https://dev-nf6chill.eu.auth0.com/",
+          "JWKS_URI": "https://dev-nf6chill.eu.auth0.com/.well-known/jwks.json"
+        },
+        "events": [],
+        "name": "Nf6Chill-dev-authDeleteGame",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "AuthDeleteGameLambdaVersionqjcEeJSp0vd3k90oheLq1p6u6bj8mZ7b3apR4rRDmRU"
+      },
       "addGame": {
-        "handler": "s_addGame.handler",
+        "handler": "src/actions/addGame.handler",
         "memorySize": 128,
         "description": "Adds a game to the games table",
         "environment": {
-          "GAMES_TABLE": "Nf6Chill_games_prod",
-          "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
         },
         "events": [
           {
@@ -2754,24 +3724,78 @@
                 ],
                 "allowCredentials": false
               },
+              "authorizer": {
+                "name": "authAddGame",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthAddGameLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "Nf6Chill-prod-addGame",
+        "name": "Nf6Chill-dev-addGame",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "AddGameLambdaVersionzceXJm1pOAf7Zv9aMUqhFZZaev005siXTdFxHOgR8w"
+        "versionLogicalId": "AddGameLambdaVersionXyRl1DdXJbODZ6SQrwWxCzKpUlr743fRlOa54svVCM"
+      },
+      "updateCache": {
+        "handler": "src/actions/updateCache.handler",
+        "memorySize": 128,
+        "description": "Updates the s3 cache",
+        "environment": {
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "updateCache",
+              "method": "post",
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "Nf6Chill-dev-updateCache",
+        "package": {},
+        "memory": 128,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "UpdateCacheLambdaVersionhgFBsMPxwTslPaFAvP1Jg3DgNU00XBzuHTIwC9dIkhU"
       },
       "addRawGame": {
-        "handler": "s_addRawGame.handler",
+        "handler": "src/actions/addRawGame.handler",
         "memorySize": 128,
         "description": "Adds a raw game to the games table",
         "environment": {
-          "GAMES_TABLE": "Nf6Chill_games_prod"
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
         },
         "events": [
           {
@@ -2797,24 +3821,33 @@
                 ],
                 "allowCredentials": false
               },
+              "authorizer": {
+                "name": "authAddGame",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthAddGameLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "Nf6Chill-prod-addRawGame",
+        "name": "Nf6Chill-dev-addRawGame",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "AddRawGameLambdaVersionUmtD9wxGY2shX46rdQjs7cXhUsM1O5fRrAESTUjSOmI"
+        "versionLogicalId": "AddRawGameLambdaVersionvkFDVeRn1d8oy4DZjlGKwhlK0HHzu6zaUZ3ffGmzg"
       },
       "addPlayer": {
-        "handler": "s_addPlayer.handler",
+        "handler": "src/actions/addPlayer.handler",
         "memorySize": 128,
         "description": "Adds a player to the rankings table",
         "environment": {
-          "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
         },
         "events": [
           {
@@ -2840,24 +3873,33 @@
                 ],
                 "allowCredentials": false
               },
+              "authorizer": {
+                "name": "authAddPlayer",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthAddPlayerLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "Nf6Chill-prod-addPlayer",
+        "name": "Nf6Chill-dev-addPlayer",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "AddPlayerLambdaVersionU7NqojWaGRLB63y1quyubHBgwPrHm93HCO5SwNmy4"
+        "versionLogicalId": "AddPlayerLambdaVersiond8h4gxKTSVVsleIFXid4giCims3lY7bwG52WBqVvo"
       },
       "addRawPlayer": {
-        "handler": "s_addRawPlayer.handler",
+        "handler": "src/actions/addRawPlayer.handler",
         "memorySize": 128,
         "description": "Adds a raw player to the rankings table",
         "environment": {
-          "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
         },
         "events": [
           {
@@ -2883,24 +3925,32 @@
                 ],
                 "allowCredentials": false
               },
+              "authorizer": {
+                "name": "authAddPlayer",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthAddPlayerLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "Nf6Chill-prod-addRawPlayer",
+        "name": "Nf6Chill-dev-addRawPlayer",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "AddRawPlayerLambdaVersionsUawrtwULbNFigzBx6fn0quPNOsPqQAzZ0raS98"
+        "versionLogicalId": "AddRawPlayerLambdaVersioniFxBOiKdNlr1hEC1x3liv4asvD47ukC5MQldY98UkJg"
       },
       "getRankings": {
-        "handler": "s_getRankings.handler",
+        "handler": "src/actions/getRankings.handler",
         "memorySize": 128,
         "description": "Lists the rankings",
         "environment": {
-          "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
         },
         "events": [
           {
@@ -2930,20 +3980,22 @@
             }
           }
         ],
-        "name": "Nf6Chill-prod-getRankings",
+        "name": "Nf6Chill-dev-getRankings",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "GetRankingsLambdaVersion5sGKDVvjQk4NWY5c2rqhlapnF7PibFalDiQZ6TQig"
+        "versionLogicalId": "GetRankingsLambdaVersionhnUg3MvMN2D8IRbq6pjYLaqjzRkWiErOb42y00ny3E"
       },
       "getGames": {
-        "handler": "s_getGames.handler",
+        "handler": "src/actions/getGames.handler",
         "memorySize": 128,
         "description": "Lists games",
         "environment": {
-          "GAMES_TABLE": "Nf6Chill_games_prod"
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev",
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
         },
         "events": [
           {
@@ -2973,21 +4025,21 @@
             }
           }
         ],
-        "name": "Nf6Chill-prod-getGames",
+        "name": "Nf6Chill-dev-getGames",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "GetGamesLambdaVersionmziqpHgdH7cpIUj4xfRjTXZcheGxKypg80KllVFUnL8"
+        "versionLogicalId": "GetGamesLambdaVersion5qNWTByfTT7sKpCH458P2IrN6ydU9XvH6rjmiqnq0"
       },
       "createTournament": {
-        "handler": "s_createTournament.handler",
+        "handler": "src/actions/createTournament.handler",
         "memorySize": 128,
         "description": "Creates a new tournament",
         "environment": {
-          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_prod",
-          "RANKINGS_TABLE": "Nf6Chill_rankings_prod"
+          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev",
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev"
         },
         "events": [
           {
@@ -3013,25 +4065,33 @@
                 ],
                 "allowCredentials": false
               },
+              "authorizer": {
+                "name": "authAddTournament",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthAddTournamentLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "Nf6Chill-prod-createTournament",
+        "name": "Nf6Chill-dev-createTournament",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "CreateTournamentLambdaVersionCUh56tm57rYP7ZJOCTQjIF8RTaobhnh14dcjwtjiU"
+        "versionLogicalId": "CreateTournamentLambdaVersionGFizG5BccSet5X5N6snvF9RRjmfikMPfaGR2c1LIYw"
       },
       "getTournament": {
-        "handler": "s_getTournament.handler",
+        "handler": "src/actions/getTournament.handler",
         "memorySize": 128,
         "description": "Returns a specific tournament",
         "environment": {
-          "GAMES_TABLE": "Nf6Chill_games_prod",
-          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_prod"
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
         },
         "events": [
           {
@@ -3061,20 +4121,20 @@
             }
           }
         ],
-        "name": "Nf6Chill-prod-getTournament",
+        "name": "Nf6Chill-dev-getTournament",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "GetTournamentLambdaVersion9yh9nRBv5E1u0sO3QhFgh0h0N8CxGCCeFNi7zNvErQ"
+        "versionLogicalId": "GetTournamentLambdaVersionlsQaBgCvvb5vmT0saboZWzyKCn8BDZzI1hYwihJLfCk"
       },
       "getTournaments": {
-        "handler": "s_getTournaments.handler",
+        "handler": "src/actions/getTournaments.handler",
         "memorySize": 128,
         "description": "Returns all tournaments",
         "environment": {
-          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_prod"
+          "TOURNAMENT_TABLE": "Nf6Chill_tournaments_dev"
         },
         "events": [
           {
@@ -3104,20 +4164,21 @@
             }
           }
         ],
-        "name": "Nf6Chill-prod-getTournaments",
+        "name": "Nf6Chill-dev-getTournaments",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "GetTournamentsLambdaVersion1Tjg3VFNutevDxzzXXGciWNCkXySROe0MHJZRq8PHfA"
+        "versionLogicalId": "GetTournamentsLambdaVersionpdp2rQdbCi4yTdB7KufkSjv7LWCDVeclvI0dIkVQA"
       },
       "removeDuplicateGames": {
-        "handler": "s_removeDuplicateGames.handler",
+        "handler": "src/actions/removeDuplicateGames.handler",
         "memorySize": 128,
         "description": "Removes one of all duplicate games",
         "environment": {
-          "GAMES_TABLE": "Nf6Chill_games_prod"
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
         },
         "events": [
           {
@@ -3143,26 +4204,189 @@
                 ],
                 "allowCredentials": false
               },
+              "authorizer": {
+                "name": "authDeleteGame",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthDeleteGameLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "Nf6Chill-prod-removeDuplicateGames",
+        "name": "Nf6Chill-dev-removeDuplicateGames",
         "package": {},
         "memory": 128,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "RemoveDuplicateGamesLambdaVersionQSNFZGLhhFVgqTTy6XxzTDWMdcBi3gVgIo76p6e7Y"
+        "versionLogicalId": "RemoveDuplicateGamesLambdaVersionHMi6zD3zrajBwujpiGSavL9nVKQH8iYmU48V0iPfqSI"
+      },
+      "deleteGame": {
+        "handler": "src/actions/deleteGame.handler",
+        "memorySize": 128,
+        "description": "Removes a game from the server",
+        "environment": {
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "game/{id}",
+              "method": "delete",
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "DELETE"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "authorizer": {
+                "name": "authDeleteGame",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthDeleteGameLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
+              "request": {
+                "parameters": {
+                  "method.request.path.id": true
+                }
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "Nf6Chill-dev-deleteGame",
+        "package": {},
+        "memory": 128,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "DeleteGameLambdaVersion0zdTWGRMXiGquRbdGHWTtoGX4TlW5d2shKH29wHQ"
+      },
+      "recalculateGames": {
+        "handler": "src/actions/recalculateGames.handler",
+        "memorySize": 128,
+        "description": "Recalculates all games and updates the player rankings",
+        "environment": {
+          "GAMES_TABLE": "Nf6Chill_games_dev",
+          "RANKINGS_TABLE": "Nf6Chill_rankings_dev",
+          "CACHE_BUCKET": "bogb-ranking-and-matches-dev"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "recalculate",
+              "method": "get",
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "authorizer": {
+                "name": "authAddGame",
+                "arn": {
+                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthAddGameLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
+                },
+                "managedExternally": false,
+                "identitySource": "method.request.header.Authorization"
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "Nf6Chill-dev-recalculateGames",
+        "package": {},
+        "memory": 128,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "RecalculateGamesLambdaVersionm0cCJXqcTk0oT7O5OVQJpCnjwS3T3U4IUuTfLBviw2M"
       }
     },
     "resources": {
       "Resources": {
+        "CacheBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "bogb-ranking-and-matches-dev",
+            "CorsConfiguration": {
+              "CorsRules": [
+                {
+                  "AllowedOrigins": [
+                    "*"
+                  ],
+                  "AllowedHeaders": [
+                    "*"
+                  ],
+                  "AllowedMethods": [
+                    "GET",
+                    "PUT",
+                    "POST",
+                    "DELETE",
+                    "HEAD"
+                  ],
+                  "MaxAge": 3000
+                }
+              ]
+            }
+          }
+        },
+        "BucketPolicy": {
+          "Type": "AWS::S3::BucketPolicy",
+          "Properties": {
+            "Bucket": "bogb-ranking-and-matches-dev",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:s3:::bogb-ranking-and-matches-dev/*",
+                  "Principal": "*"
+                }
+              ]
+            }
+          }
+        },
         "GamesTable": {
           "Type": "AWS::DynamoDB::Table",
           "DeletionPolicy": "Retain",
           "Properties": {
-            "TableName": "Nf6Chill_games_prod",
+            "TableName": "Nf6Chill_games_dev",
             "AttributeDefinitions": [
               {
                 "AttributeName": "id",
@@ -3185,7 +4409,7 @@
           "Type": "AWS::DynamoDB::Table",
           "DeletionPolicy": "Retain",
           "Properties": {
-            "TableName": "Nf6Chill_rankings_prod",
+            "TableName": "Nf6Chill_rankings_dev",
             "AttributeDefinitions": [
               {
                 "AttributeName": "name",
@@ -3208,7 +4432,7 @@
           "Type": "AWS::DynamoDB::Table",
           "DeletionPolicy": "Retain",
           "Properties": {
-            "TableName": "Nf6Chill_tournaments_prod",
+            "TableName": "Nf6Chill_tournaments_dev",
             "AttributeDefinitions": [
               {
                 "AttributeName": "id",
@@ -3230,18 +4454,36 @@
       },
       "Outputs": {}
     },
+    "configValidationMode": "warn",
     "serviceFilename": "serverless.yaml",
     "app": "nf6-chill",
-    "org": "petteramu",
     "layers": {},
-    "isDashboardMonitoringPreconfigured": true,
-    "isDashboardAppPreconfigured": true,
-    "appUid": "fvKNcH3rS7Crl7VbtN",
-    "orgUid": "nslsKjXX3GFMfjghVg",
+    "initialServerlessConfig": {
+      "service": {
+        "$ref": "$[\"service\"][\"serviceObject\"]"
+      },
+      "app": "nf6-chill",
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      },
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      }
+    },
+    "isDashboardMonitoringPreconfigured": false,
     "artifact": "E:\\Projects\\Fussball-server\\.serverless\\Nf6Chill.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/Nf6Chill/prod/1585067660178-2020-03-24T16:34:20.178Z",
+    "artifactDirectoryName": "serverless/Nf6Chill/dev/1610571576942-2021-01-13T20:59:36.942Z",
     "artifact": "Nf6Chill.zip"
   }
 }
